@@ -9,7 +9,7 @@
 
 static const char* TAG = "main";
 
-static const int32_t KEYS_GPIO[] = {7, 6, 21, 20, 22, 19};
+static const gpio_num_t KEYS_GPIO[] = {7, 6, 21, 20, 22, 19};
 
 static void app_keys_cb(uint8_t id, key_evt_t evt, void* ctx) {
     switch (evt) {
