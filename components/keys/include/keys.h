@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-#define KEYS_MAX_NUM 32
 #define KEYS_LONG_PRESS_MS 700
 
 typedef enum {
@@ -29,7 +28,7 @@ typedef void (*keys_event_cb_t)(uint8_t key_id, key_evt_t evt, void* user_ctx);
  * @brief Initialize N GPIO keys using espressif/button.
  *        Registers SINGLE/DOUBLE/LONG callbacks for each key.
  * @param gpio_list         array of GPIO numbers (length == num_keys)
- * @param num_keys          number of keys (1..KEYS_MAX_NUM)
+ * @param num_keys          number of keys
  * @param is_active_on_low  true if button is active low (typical with pull-up)
  * @param cb                user callback for events (must not be NULL)
  * @param user_ctx          passed back as-is on each event (may be NULL)

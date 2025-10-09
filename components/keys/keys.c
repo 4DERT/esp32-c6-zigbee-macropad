@@ -10,7 +10,7 @@ static const char* TAG = "keys";
 
 button_event_args_t a = {.long_press.press_time = KEYS_LONG_PRESS_MS};
 
-static button_handle_t s_btn[KEYS_MAX_NUM];
+static button_handle_t* s_btn;
 static keys_event_cb_t s_cb;
 static void* s_ctx;
 static uint8_t s_num;
@@ -41,17 +41,36 @@ static esp_err_t register_key_callbacks(uint8_t idx) {
     return ESP_OK;
 }
 
+static void keys_cleanup(int32_t created_count) {
+    if (s_btn) {
+        for (int32_t i = 0; i < created_count; ++i) {
+            if (s_btn[i]) {
+                iot_button_delete(s_btn[i]);
+                s_btn[i] = NULL;
+            }
+        }
+        free(s_btn);
+        s_btn = NULL;
+    }
+    s_num = 0;
+    s_cb = NULL;
+    s_ctx = NULL;
+    s_inited = false;
+}
+
 esp_err_t keys_init(const gpio_num_t* gpio_list, uint8_t num_keys, bool is_active_on_low, keys_event_cb_t cb, void* user_ctx) {
     // Basic validation
     ESP_RETURN_ON_FALSE(!s_inited, ESP_ERR_INVALID_STATE, TAG, "already initialized");
     ESP_RETURN_ON_FALSE(gpio_list != NULL, ESP_ERR_INVALID_ARG, TAG, "gpio_list is NULL");
     ESP_RETURN_ON_FALSE(num_keys > 0, ESP_ERR_INVALID_ARG, TAG, "num_keys == 0");
-    ESP_RETURN_ON_FALSE(num_keys <= KEYS_MAX_NUM, ESP_ERR_INVALID_ARG, TAG, "num_keys > KEYS_MAX_NUM");
     ESP_RETURN_ON_FALSE(cb != NULL, ESP_ERR_INVALID_ARG, TAG, "callback is NULL");
 
     s_cb = cb;
     s_ctx = user_ctx;
     s_num = num_keys;
+
+    s_btn = (button_handle_t*)calloc(s_num, sizeof(*s_btn));
+    ESP_RETURN_ON_FALSE(s_btn != NULL, ESP_ERR_NO_MEM, TAG, "no memory for buttons array");
 
     for (uint8_t i = 0; i < num_keys; ++i) {
         button_config_t cfg = {};
@@ -63,10 +82,17 @@ esp_err_t keys_init(const gpio_num_t* gpio_list, uint8_t num_keys, bool is_activ
         esp_err_t err = iot_button_new_gpio_device(&cfg, &gpio_cfg, &s_btn[i]);
         if (err != ESP_OK || !s_btn[i]) {
             ESP_LOGE(TAG, "create button failed (key=%u, gpio=%" PRId32 "): %s", i, (int32_t)gpio_list[i], esp_err_to_name(err));
+            keys_cleanup(i);
             return err != ESP_OK ? err : ESP_FAIL;
         }
 
-        ESP_RETURN_ON_ERROR(register_key_callbacks(i), TAG, "register callbacks failed (key=%u)", i);
+        // ESP_RETURN_ON_ERROR(register_key_callbacks(i), TAG, "register callbacks failed (key=%u)", i);
+        esp_err_t err_cb = register_key_callbacks(i);
+        if (err_cb != ESP_OK) {
+            ESP_LOGE(TAG, "register callbacks failed (key=%u)", i);
+            keys_cleanup(i + 1); // Clean up all successfully created buttons up to index i (inclusive)
+            return err_cb;
+        }
     }
 
     s_inited = true;
@@ -75,16 +101,11 @@ esp_err_t keys_init(const gpio_num_t* gpio_list, uint8_t num_keys, bool is_activ
 }
 
 void keys_deinit(void) {
-    for (uint8_t i = 0; i < s_num; ++i) {
-        if (s_btn[i]) {
-            iot_button_delete(s_btn[i]);
-            s_btn[i] = NULL;
-        }
-    }
-    s_num = 0;
-    s_cb = NULL;
-    s_ctx = NULL;
-    s_inited = false;
+    if (!s_inited)
+        return;
+
+    // Free all allocated buttons and reset internal state
+    keys_cleanup(s_num);
 }
 
 uint8_t keys_count(void) { return s_num; }
