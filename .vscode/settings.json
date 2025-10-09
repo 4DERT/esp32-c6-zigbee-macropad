@@ -22,6 +22,11 @@
     "cmake.sourceDirectory": "${workspaceFolder}",
     "files.associations": {
         "freertos.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "esp_log.h": "c",
+        "iot_button.h": "c",
+        "keys.h": "c",
+        "esp_err.h": "c",
+        "button_types.h": "c"
     }
 }
