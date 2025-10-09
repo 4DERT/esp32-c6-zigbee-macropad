@@ -1,0 +1,27 @@
+{
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.intelliSenseEngine": "default",
+
+    "idf.adapterTargetName": "esp32",
+    "idf.espIdfPath": "/opt/esp-idf",
+    "idf.toolsPath": "/home/vscode/.espressif",
+    "idf.port": "/dev/ttyUSB0",
+
+    "idf.customExtraPaths": "/home/vscode/.espressif/tools/**/bin",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "/home/vscode/.espressif/tools/openocd-esp32/*/openocd-esp32/share/openocd/scripts",
+        "ESP_ROM_ELF_DIR": "/home/vscode/.espressif/tools/esp-rom-elfs/*/"
+    },
+
+    "idf.openOcdConfigs": [
+        "interface/ftdi/esp32_devkitj_v1.cfg",
+        "target/esp32.cfg"
+    ],
+
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "files.associations": {
+        "freertos.h": "c",
+        "task.h": "c"
+    }
+}
