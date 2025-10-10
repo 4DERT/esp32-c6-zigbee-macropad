@@ -7,6 +7,7 @@
 #define INSTALLCODE_POLICY_ENABLE false                                  /* enable the install code policy for security */
 #define ED_KEEP_ALIVE 3000                                               /* 3000 millisecond */
 #define ESP_ZB_PRIMARY_CHANNEL_MASK ESP_ZB_TRANSCEIVER_ALL_CHANNELS_MASK /* Zigbee primary channel mask */
+#define RANGE_EXTENDER_ENDPOINT 1
 
 #define ESP_ZB_ZED_CONFIG()                                                                                                                          \
     {                                                                                                                                                \
@@ -16,6 +17,19 @@
             {                                                                                                                                        \
                 .ed_timeout = ED_AGING_TIMEOUT,                                                                                                      \
                 .keep_alive = ED_KEEP_ALIVE,                                                                                                         \
+            },                                                                                                                                       \
+    }
+
+#define ESP_ZB_ROUTER_CONFIG()                                                                                                                       \
+    {                                                                                                                                                \
+        .esp_zb_role = ESP_ZB_DEVICE_TYPE_ROUTER,                                                                                                    \
+        .install_code_policy = INSTALLCODE_POLICY_ENABLE,                                                                                            \
+        .nwk_cfg =                                                                                                                                   \
+            {                                                                                                                                        \
+                .zczr_cfg =                                                                                                                          \
+                    {                                                                                                                                \
+                        .max_children = 10,                                                                                                          \
+                    },                                                                                                                               \
             },                                                                                                                                       \
     }
 

@@ -110,14 +110,50 @@ esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id, const 
     return ret;
 }
 
+esp_err_t create_range_extender_endpoint(uint8_t endpoint) {
+    esp_zb_endpoint_config_t ep_cfg = {
+        .endpoint = endpoint,
+        .app_profile_id = ESP_ZB_AF_HA_PROFILE_ID,
+        .app_device_id = ESP_ZB_HA_RANGE_EXTENDER_DEVICE_ID,
+        .app_device_version = 0,
+    };
+
+    // clusters
+    esp_zb_cluster_list_t* cl = esp_zb_zcl_cluster_list_create();
+
+    // minimal metadata for the range extender endpoint
+    esp_zb_cluster_list_add_basic_cluster(cl, esp_zb_basic_cluster_create(NULL), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+
+    // allow identifying the range extender endpoint
+    esp_zb_cluster_list_add_identify_cluster(cl, esp_zb_identify_cluster_create(NULL), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+
+    // can send Identify commands if needed
+    esp_zb_cluster_list_add_identify_cluster(cl, esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
+
+    // register endpoint
+    return zbc_register_endpoint(&ep_cfg, cl, NULL);
+}
+
 static void esp_zb_task(void* pvParameters) {
-    /* initialize Zigbee stack with Zigbee end-device config */
-    // esp_zb_cfg_t zb_nwk_cfg = ESP_ZB_ZED_CONFIG();
+/* initialize Zigbee stack with Zigbee end-device config */
+#if CONFIG_ZB_ZED
     esp_zb_cfg_t zb_nwk_cfg = ESP_ZB_ZED_CONFIG();
-#if USE_DEEP_SLEEP
+#elif CONFIG_ZB_ZCZR
+    esp_zb_cfg_t zb_nwk_cfg = ESP_ZB_ROUTER_CONFIG();
+#else
+#error "Select Zigbee device role in menuconfig (ZED or ZC/ZR)."
+#endif
+
+#if USE_DEEP_SLEEP && CONFIG_ZB_ZED
     esp_zb_sleep_enable(true);
 #endif
+
     esp_zb_init(&zb_nwk_cfg);
+
+// Create range extender endpoint if necessary
+#if CONFIG_ZB_ZCZR
+    create_range_extender_endpoint(RANGE_EXTENDER_ENDPOINT);
+#endif
 
     // register all endpoints
     esp_zb_device_register(s_ep_list);
