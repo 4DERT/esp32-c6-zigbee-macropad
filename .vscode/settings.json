@@ -27,6 +27,8 @@
         "iot_button.h": "c",
         "keys.h": "c",
         "esp_err.h": "c",
-        "button_types.h": "c"
+        "button_types.h": "c",
+        "cstdint": "c",
+        "esp_zigbee_core.h": "c"
     }
 }
