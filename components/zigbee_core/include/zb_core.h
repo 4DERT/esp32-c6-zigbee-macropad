@@ -30,10 +30,11 @@
     }
 
 typedef void (*zbc_endpoint_attribute_cb_t)(const esp_zb_zcl_set_attr_value_message_t* message);
+typedef void (*zbc_network_leave_cb_t)(void);
 
 esp_err_t zbc_register_endpoint(esp_zb_endpoint_config_t* endpoint_cfg, esp_zb_cluster_list_t* cluster_list,
                                 zbc_endpoint_attribute_cb_t attribute_cb);
-void zbc_init();
+void zbc_init(zbc_network_leave_cb_t network_leave_cb);
 void zbc_start();
 bool zbc_is_connected();
 void zbc_wait_until_connected();

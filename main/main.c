@@ -34,6 +34,10 @@ static void app_keys_cb(uint8_t id, key_evt_t evt, void* ctx) {
 }
 
 void zbc_endpoint_attribute_handler(const esp_zb_zcl_set_attr_value_message_t* message) { ESP_LOGI(TAG, "zbc_endpoint_attribute_cb_t"); }
+void on_network_leave() {
+    ESP_LOGI(TAG, "Leaving the ZB network - bye!");
+}
+
 void zb_create_endpoint();
 
 static void init_nvs(void);
@@ -44,7 +48,7 @@ void app_main(void) {
     keys_init(KEYS_GPIO, sizeof(KEYS_GPIO) / sizeof(KEYS_GPIO[0]), true, app_keys_cb, NULL);
 
     // zigbee
-    zbc_init();
+    zbc_init(on_network_leave);
     zb_create_endpoint();
     zbc_start();
 

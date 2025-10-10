@@ -14,6 +14,7 @@ static EventGroupHandle_t connected_event_group;
 
 static esp_zb_ep_list_t* s_ep_list;
 static zbc_endpoint_attribute_cb_t s_ep_cb[ZBC_MAX_EP];
+static zbc_network_leave_cb_t s_network_leave_cb;
 
 static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask) {
     ESP_RETURN_ON_FALSE(esp_zb_bdb_start_top_level_commissioning(mode_mask) == ESP_OK, , TAG, "Failed to start Zigbee bdb commissioning");
@@ -61,6 +62,8 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t* signal_struct) {
         break;
     case ESP_ZB_ZDO_SIGNAL_LEAVE: // End Device + Router
         ESP_LOGI(TAG, "Factory resetting Zigbee stack, device will reboot!");
+        if (s_network_leave_cb)
+            s_network_leave_cb();
         esp_zb_factory_reset();
         break;
 #if USE_DEEP_SLEEP
@@ -143,10 +146,11 @@ esp_err_t zbc_register_endpoint(esp_zb_endpoint_config_t* endpoint_cfg, esp_zb_c
     return ESP_OK;
 }
 
-void zbc_init() {
+void zbc_init(zbc_network_leave_cb_t network_leave_cb) {
     connected_event_group = xEventGroupCreate();
 
     s_ep_list = esp_zb_ep_list_create();
+    s_network_leave_cb = network_leave_cb;
 
     esp_zb_platform_config_t config = {
         .radio_config = ESP_ZB_DEFAULT_RADIO_CONFIG(),
@@ -157,9 +161,7 @@ void zbc_init() {
     ESP_ERROR_CHECK(esp_zb_platform_config(&config));
 }
 
-void zbc_start() {
-    xTaskCreate(esp_zb_task, "Zigbee_main", 8192, NULL, 5, NULL);
-}
+void zbc_start() { xTaskCreate(esp_zb_task, "Zigbee_main", 8192, NULL, 5, NULL); }
 
 bool zbc_is_connected() {
     EventBits_t bits = xEventGroupGetBits(connected_event_group);
@@ -170,5 +172,7 @@ void zbc_wait_until_connected() { xEventGroupWaitBits(connected_event_group, CON
 
 void zbc_factory_reset() {
     ESP_LOGI(TAG, "Factory resetting Zigbee stack, device will reboot!");
+    if (s_network_leave_cb)
+        s_network_leave_cb();
     esp_zb_factory_reset();
 }
