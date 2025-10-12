@@ -29,6 +29,23 @@
         "esp_err.h": "c",
         "button_types.h": "c",
         "cstdint": "c",
-        "esp_zigbee_core.h": "c"
+        "esp_zigbee_core.h": "c",
+        "stdbool.h": "c",
+        "stdlib.h": "c",
+        "nvs_flash.h": "c",
+        "zb_core.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "span": "c",
+        "stacktrace": "c",
+        "valarray": "c",
+        "bitset": "c",
+        "rope": "c",
+        "slist": "c",
+        "format": "c",
+        "ranges": "c",
+        "regex": "c",
+        "cstdlib": "c"
     }
 }
