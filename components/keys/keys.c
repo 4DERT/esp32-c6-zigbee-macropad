@@ -27,17 +27,23 @@ static void dispatch(uint8_t id, key_evt_t evt) {
 }
 
 // Button library callbacks: usr carries packed key id.
+static void on_down(void* btn_handle, void* usr) { dispatch((uint8_t)(uintptr_t)usr, KEY_EVT_PRESS_DOWN); }
 static void on_single(void* btn_handle, void* usr) { dispatch((uint8_t)(uintptr_t)usr, KEY_EVT_SINGLE); }
 static void on_double(void* btn_handle, void* usr) { dispatch((uint8_t)(uintptr_t)usr, KEY_EVT_DOUBLE); }
 static void on_long(void* btn_handle, void* usr) { dispatch((uint8_t)(uintptr_t)usr, KEY_EVT_LONG); }
+static void on_up(void* btn_handle, void* usr) { dispatch((uint8_t)(uintptr_t)usr, KEY_EVT_PRESS_UP); }
 
 static esp_err_t register_key_callbacks(uint8_t idx) {
+    ESP_RETURN_ON_ERROR(iot_button_register_cb(s_btn[idx], BUTTON_PRESS_DOWN, NULL, on_down, (void*)(uintptr_t)idx), TAG,
+                        "register PRESS DOWN failed (key=%u)", idx);
     ESP_RETURN_ON_ERROR(iot_button_register_cb(s_btn[idx], BUTTON_SINGLE_CLICK, NULL, on_single, (void*)(uintptr_t)idx), TAG,
                         "register SINGLE failed (key=%u)", idx);
     ESP_RETURN_ON_ERROR(iot_button_register_cb(s_btn[idx], BUTTON_DOUBLE_CLICK, NULL, on_double, (void*)(uintptr_t)idx), TAG,
                         "register DOUBLE failed (key=%u)", idx);
     ESP_RETURN_ON_ERROR(iot_button_register_cb(s_btn[idx], BUTTON_LONG_PRESS_START, &a, on_long, (void*)(uintptr_t)idx), TAG,
                         "register LONG failed (key=%u)", idx);
+    ESP_RETURN_ON_ERROR(iot_button_register_cb(s_btn[idx], BUTTON_PRESS_UP, NULL, on_up, (void*)(uintptr_t)idx), TAG,
+                        "register PRESS UP failed (key=%u)", idx);
     return ESP_OK;
 }
 

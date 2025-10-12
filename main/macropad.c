@@ -97,6 +97,10 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
     const uint8_t ep = MACROPAD_MAP[id].zb_endpoint;
 
     switch (evt) {
+    case KEY_EVT_PRESS_DOWN:
+        ESP_LOGI(TAG, "key %u: pressed", id);
+        gpio_set_level(GPIO_NUM_15, 1);
+        break;
     case KEY_EVT_SINGLE:
         ESP_LOGI(TAG, "key %u: single", id);
         send_zb_command(ep, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID);
@@ -109,12 +113,20 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
         ESP_LOGI(TAG, "key %u: long", id);
         send_zb_command(ep, ESP_ZB_ZCL_CMD_ON_OFF_OFF_ID);
         break;
+    case KEY_EVT_PRESS_UP:
+        ESP_LOGI(TAG, "key %u: released", id);
+        gpio_set_level(GPIO_NUM_15, 0);
+        break;
     }
 }
 
 /* --------- Public init --------- */
 
 esp_err_t macropad_init() {
+    // init LED
+    gpio_set_direction(GPIO_NUM_15, GPIO_MODE_OUTPUT);
+    gpio_set_level(GPIO_NUM_15, 0);
+
     // Create endpoints
     for (uint8_t i = 0; i < MACROPAD_KEY_COUNT; ++i) {
         bool is_duplicated = false;

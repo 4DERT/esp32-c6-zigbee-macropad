@@ -11,9 +11,11 @@ extern "C" {
 #define KEYS_LONG_PRESS_MS 700
 
 typedef enum {
-    KEY_EVT_SINGLE = 0,
+    KEY_EVT_PRESS_DOWN = 0,
+    KEY_EVT_SINGLE,
     KEY_EVT_DOUBLE,
     KEY_EVT_LONG,
+    KEY_EVT_PRESS_UP,
 } key_evt_t;
 
 /**
