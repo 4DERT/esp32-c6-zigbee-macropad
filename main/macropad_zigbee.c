@@ -1,9 +1,26 @@
 #include "macropad_zigbee.h"
 
+#include <string.h>
+
 #include "macropad_led.h"
 #include "zb_core.h"
 
 static const char* TAG = "Macropad_Zigbee";
+
+#define MANUF_LEN (sizeof(CONFIG_MACROPAD_MANUFACTURER_NAME) - 1)
+#define MODEL_LEN (sizeof(CONFIG_MACROPAD_MODEL_IDENTIFIER) - 1)
+
+_Static_assert(MANUF_LEN <= 255, "Manufacturer name too long for ZCL char string");
+_Static_assert(MODEL_LEN <= 255, "Model identifier too long for ZCL char string");
+
+static uint8_t s_manufacturer[1 + MANUF_LEN];
+static uint8_t s_model[1 + MODEL_LEN];
+
+static inline void zcl_make_char(uint8_t* dst, const char* src, size_t len) {
+    dst[0] = (uint8_t)len;
+    if (len)
+        memcpy(&dst[1], src, len);
+}
 
 static const char* cmd_str(esp_zb_zcl_on_off_cmd_id_t cmd) {
     switch (cmd) {
@@ -38,7 +55,12 @@ void on_zbc_endpoint_attribute_set(const esp_zb_zcl_set_attr_value_message_t* me
 
 // Public
 
-void macropad_zb_init() { zbc_init(NULL); }
+void macropad_zb_init() {
+    zcl_make_char(s_manufacturer, CONFIG_MACROPAD_MANUFACTURER_NAME, MANUF_LEN);
+    zcl_make_char(s_model, CONFIG_MACROPAD_MODEL_IDENTIFIER, MODEL_LEN);
+
+    zbc_init(NULL);
+}
 
 void macropad_zb_start() { zbc_start(); }
 
@@ -85,19 +107,15 @@ esp_err_t macropad_zb_create_endpoint(uint8_t endpoint) {
 
     esp_zb_cluster_list_t* cl = esp_zb_zcl_cluster_list_create();
 
-    // --- Server clusters (for device info / commissioning) ---
+    // Server clusters (for device info / commissioning)
     esp_zb_cluster_list_add_basic_cluster(cl, esp_zb_basic_cluster_create(&basic_cfg), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
     esp_zb_cluster_list_add_identify_cluster(cl, esp_zb_identify_cluster_create(&identify_cfg), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
 
-    // Set BASIC attributes (manufacturer & model) if you have macros
+    // Set BASIC attributes (manufacturer & model)
     esp_zb_attribute_list_t* basic_srv = esp_zb_cluster_list_get_cluster(cl, ESP_ZB_ZCL_CLUSTER_ID_BASIC, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
     if (basic_srv) {
-#ifdef ESP_MANUFACTURER_NAME
-        (void)esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, ESP_MANUFACTURER_NAME);
-#endif
-#ifdef ESP_MODEL_IDENTIFIER
-        (void)esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, ESP_MODEL_IDENTIFIER);
-#endif
+        esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, (void*)s_manufacturer);
+        esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (void*)s_model);
     }
 
     esp_zb_cluster_list_add_on_off_cluster(cl, esp_zb_on_off_cluster_create(NULL), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);

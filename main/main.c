@@ -10,8 +10,6 @@
 #include "macropad.h"
 #include "zb_core.h"
 
-static const char* TAG = "main";
-
 static void init_nvs(void);
 
 void app_main(void) {

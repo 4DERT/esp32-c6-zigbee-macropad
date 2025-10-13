@@ -1,0 +1,92 @@
+menu "Macropad"
+
+config MACROPAD_LED_GPIO
+    int "Status LED GPIO"
+    default 15
+    help
+      GPIO for status LED.
+
+config MACROPAD_LED_ACTIVE_STATE
+    int "Status LED active state"
+    default 1
+    help
+        Set the active state for the status LED. Use 0 for active low, 1 for active high.
+
+config MACROPAD_CONNECT_BLINK_MS
+    int "Connect blink period (ms)"
+    default 100
+    range 10 500
+
+config MACROPAD_MANUFACTURER_NAME
+    string "ZCL Basic: Manufacturer Name"
+    default "4DERT"
+    help
+      ZCL Basic attribute (string). Leave empty to skip setting.
+
+config MACROPAD_MODEL_IDENTIFIER
+    string "ZCL Basic: Model Identifier"
+    default "Macropad"
+    help
+      ZCL Basic attribute (string). Leave empty to skip setting.
+
+config MACROPAD_KEYS_NUM
+    int "Number of keys"
+    range 1 6
+    default 6
+
+# Per-key GPIO and endpoint
+if MACROPAD_KEYS_NUM >= 1
+config MACROPAD_KEY0_GPIO
+    int "Key0 GPIO"
+    default 21
+config MACROPAD_KEY0_EP
+    int "Key0 Zigbee Endpoint"
+    default 1
+endif
+
+if MACROPAD_KEYS_NUM >= 2
+config MACROPAD_KEY1_GPIO
+    int "Key1 GPIO"
+    default 22
+config MACROPAD_KEY1_EP
+    int "Key1 Zigbee Endpoint"
+    default 2
+endif
+
+if MACROPAD_KEYS_NUM >= 3
+config MACROPAD_KEY2_GPIO
+    int "Key2 GPIO"
+    default 20
+config MACROPAD_KEY2_EP
+    int "Key2 Zigbee Endpoint"
+    default 3
+endif
+
+if MACROPAD_KEYS_NUM >= 4
+config MACROPAD_KEY3_GPIO
+    int "Key3 GPIO"
+    default 7
+config MACROPAD_KEY3_EP
+    int "Key3 Zigbee Endpoint"
+    default 4
+endif
+
+if MACROPAD_KEYS_NUM >= 5
+config MACROPAD_KEY4_GPIO
+    int "Key4 GPIO"
+    default 19
+config MACROPAD_KEY4_EP
+    int "Key4 Zigbee Endpoint"
+    default 5
+endif
+
+if MACROPAD_KEYS_NUM >= 6
+config MACROPAD_KEY5_GPIO
+    int "Key5 GPIO"
+    default 6
+config MACROPAD_KEY5_EP
+    int "Key5 Zigbee Endpoint"
+    default 6
+endif
+
+endmenu

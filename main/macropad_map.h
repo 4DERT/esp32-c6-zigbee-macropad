@@ -8,8 +8,26 @@ typedef struct {
     uint8_t zb_endpoint;
 } macropad_map_t;
 
+/* Values come from Kconfig */
 static const macropad_map_t MACROPAD_MAP[] = {
-    {GPIO_NUM_7, 11}, {GPIO_NUM_6, 21}, {GPIO_NUM_21, 31}, {GPIO_NUM_20, 41}, {GPIO_NUM_22, 51}, {GPIO_NUM_19, 61},
+#if CONFIG_MACROPAD_KEYS_NUM >= 1
+    {(gpio_num_t)CONFIG_MACROPAD_KEY0_GPIO, CONFIG_MACROPAD_KEY0_EP},
+#endif
+#if CONFIG_MACROPAD_KEYS_NUM >= 2
+    {(gpio_num_t)CONFIG_MACROPAD_KEY1_GPIO, CONFIG_MACROPAD_KEY1_EP},
+#endif
+#if CONFIG_MACROPAD_KEYS_NUM >= 3
+    {(gpio_num_t)CONFIG_MACROPAD_KEY2_GPIO, CONFIG_MACROPAD_KEY2_EP},
+#endif
+#if CONFIG_MACROPAD_KEYS_NUM >= 4
+    {(gpio_num_t)CONFIG_MACROPAD_KEY3_GPIO, CONFIG_MACROPAD_KEY3_EP},
+#endif
+#if CONFIG_MACROPAD_KEYS_NUM >= 5
+    {(gpio_num_t)CONFIG_MACROPAD_KEY4_GPIO, CONFIG_MACROPAD_KEY4_EP},
+#endif
+#if CONFIG_MACROPAD_KEYS_NUM >= 6
+    {(gpio_num_t)CONFIG_MACROPAD_KEY5_GPIO, CONFIG_MACROPAD_KEY5_EP},
+#endif
 };
 
 #define ARRAY_LEN(x) ((uint32_t)(sizeof(x) / sizeof((x)[0])))

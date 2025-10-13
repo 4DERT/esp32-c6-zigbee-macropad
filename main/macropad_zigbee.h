@@ -3,11 +3,8 @@
 #include "zb_core.h"
 #include <stdint.h>
 
-/* Basic manufacturer information */
-#define ESP_MANUFACTURER_NAME                                                                                                                        \
-    "\x09"                                                                                                                                           \
-    "ESPRESSIF"                                       /* Customized manufacturer name */
-#define ESP_MODEL_IDENTIFIER "\x07" CONFIG_IDF_TARGET /* Customized model identifier */
+#define MACROPAD_MANUFACTURER_NAME CONFIG_MACROPAD_MANUFACTURER_NAME
+#define MACROPAD_MODEL_IDENTIFIER CONFIG_MACROPAD_MODEL_IDENTIFIER
 
 void macropad_zb_init();
 void macropad_zb_start();
