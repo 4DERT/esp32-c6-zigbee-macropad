@@ -1,4 +1,5 @@
 #include "macropad.h"
+#include "macropad_led.h"
 #include "macropad_map.h"
 
 #include "esp_check.h"
@@ -18,9 +19,7 @@ void on_zbc_endpoint_attribute(const esp_zb_zcl_set_attr_value_message_t* messag
     uint16_t cluster = message->info.cluster;
 
     if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
-        gpio_set_level(GPIO_NUM_15, 1);
-        vTaskDelay(pdMS_TO_TICKS(100));
-        gpio_set_level(GPIO_NUM_15, 0);
+        macropad_led_blink();
     }
 
     ESP_LOGI(TAG, "on_zbc_endpoint_attribute: ep: %u, cl: %u", endpoint, cluster);
@@ -110,7 +109,7 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
     switch (evt) {
     case KEY_EVT_PRESS_DOWN:
         ESP_LOGI(TAG, "key %u: pressed", id);
-        gpio_set_level(GPIO_NUM_15, 1);
+        macropad_led_on();
         break;
     case KEY_EVT_SINGLE:
         ESP_LOGI(TAG, "key %u: single", id);
@@ -126,7 +125,7 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
         break;
     case KEY_EVT_PRESS_UP:
         ESP_LOGI(TAG, "key %u: released", id);
-        gpio_set_level(GPIO_NUM_15, 0);
+        macropad_led_off();
         break;
     }
 }
@@ -135,8 +134,7 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
 
 esp_err_t macropad_init() {
     // init LED
-    gpio_set_direction(GPIO_NUM_15, GPIO_MODE_OUTPUT);
-    gpio_set_level(GPIO_NUM_15, 0);
+    macropad_led_init();
 
     // init ZBC
     zbc_init(NULL);
@@ -172,14 +170,9 @@ esp_err_t macropad_init() {
     zbc_start();
 
     while (!zbc_is_connected()) {
-        gpio_set_level(GPIO_NUM_15, 1);
-        vTaskDelay(pdMS_TO_TICKS(100));
-        gpio_set_level(GPIO_NUM_15, 0);
-        vTaskDelay(pdMS_TO_TICKS(100));
+        macropad_led_blink();
     }
-    gpio_set_level(GPIO_NUM_15, 0);
 
     ESP_LOGI(TAG, "Zigbee connected!");
-
     return ESP_OK;
 }
