@@ -46,6 +46,7 @@
         "format": "c",
         "ranges": "c",
         "regex": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "esp_check.h": "c"
     }
 }
