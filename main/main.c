@@ -16,13 +16,7 @@ static void init_nvs(void);
 
 void app_main(void) {
     init_nvs();
-
-    zbc_init(NULL);
     macropad_init();
-    zbc_start();
-
-    zbc_wait_until_connected();
-    ESP_LOGI(TAG, "ZIGBEE CONNECTED!");
 }
 
 /**

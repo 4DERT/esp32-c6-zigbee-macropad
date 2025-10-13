@@ -13,7 +13,18 @@ static const char* TAG = "macropad";
     "ESPRESSIF"                                       /* Customized manufacturer name */
 #define ESP_MODEL_IDENTIFIER "\x07" CONFIG_IDF_TARGET /* Customized model identifier */
 
-void zbc_endpoint_attribute_handler(const esp_zb_zcl_set_attr_value_message_t* message) { ESP_LOGI(TAG, "zbc_endpoint_attribute_cb_t"); }
+void on_zbc_endpoint_attribute(const esp_zb_zcl_set_attr_value_message_t* message) {
+    uint8_t endpoint = message->info.dst_endpoint;
+    uint16_t cluster = message->info.cluster;
+
+    if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
+        gpio_set_level(GPIO_NUM_15, 1);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        gpio_set_level(GPIO_NUM_15, 0);
+    }
+
+    ESP_LOGI(TAG, "on_zbc_endpoint_attribute: ep: %u, cl: %u", endpoint, cluster);
+}
 
 static const char* cmd_str(esp_zb_zcl_on_off_cmd_id_t cmd) {
     switch (cmd) {
@@ -88,7 +99,7 @@ esp_err_t create_zb_endpoint(uint8_t endpoint) {
 
     esp_zb_cluster_list_add_on_off_cluster(cl, esp_zb_on_off_cluster_create(NULL), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
 
-    return zbc_register_endpoint(&ep_cfg, cl, zbc_endpoint_attribute_handler);
+    return zbc_register_endpoint(&ep_cfg, cl, on_zbc_endpoint_attribute);
 }
 
 /* --------- Keys callback --------- */
@@ -127,6 +138,9 @@ esp_err_t macropad_init() {
     gpio_set_direction(GPIO_NUM_15, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIO_NUM_15, 0);
 
+    // init ZBC
+    zbc_init(NULL);
+
     // Create endpoints
     for (uint8_t i = 0; i < MACROPAD_KEY_COUNT; ++i) {
         bool is_duplicated = false;
@@ -153,5 +167,19 @@ esp_err_t macropad_init() {
 
     ESP_RETURN_ON_ERROR(keys_init(keys_gpio, MACROPAD_KEY_COUNT, true, on_key, NULL), TAG, "keys_init failed");
     ESP_LOGI(TAG, "Macropad ready (%u keys)", MACROPAD_KEY_COUNT);
+
+    // Start ZBC
+    zbc_start();
+
+    while (!zbc_is_connected()) {
+        gpio_set_level(GPIO_NUM_15, 1);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        gpio_set_level(GPIO_NUM_15, 0);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    gpio_set_level(GPIO_NUM_15, 0);
+
+    ESP_LOGI(TAG, "Zigbee connected!");
+
     return ESP_OK;
 }
