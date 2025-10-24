@@ -9,30 +9,97 @@ static const char* TAG = "macropad";
 
 /* --------- Keys callback --------- */
 
-static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
-    const uint8_t ep = MACROPAD_MAP[id].zb_endpoint;
+static bool s_is_fn = false;
+
+static const char* evt_name(key_evt_t e) {
+    // clang-format off
+    switch (e) {
+        case KEY_EVT_PRESS_DOWN: return "press_down";
+        case KEY_EVT_SINGLE:     return "single";
+        case KEY_EVT_DOUBLE:     return "double";
+        case KEY_EVT_LONG:       return "long";
+        case KEY_EVT_PRESS_UP:   return "press_up";
+        default:                 return "unknown";
+    }
+    // clang-format on
+}
+
+static void handle_fn_layer(uint8_t id, key_evt_t evt, void* ctx) {
+    if (evt == KEY_EVT_PRESS_DOWN || evt == KEY_EVT_PRESS_UP)
+        ESP_LOGI(TAG, "fn+key %u: %s", id, evt_name(evt));
 
     switch (evt) {
     case KEY_EVT_PRESS_DOWN:
-        ESP_LOGI(TAG, "key %u: pressed", id);
-        macropad_led_on();
         break;
+    case KEY_EVT_PRESS_UP:
+        break;
+    default:
+        break;
+    }
+
+    return;
+}
+
+static void handle_nornal_layer(uint8_t id, key_evt_t evt, void* ctx) {
+    if (evt != KEY_EVT_PRESS_DOWN && evt != KEY_EVT_PRESS_UP)
+        ESP_LOGI(TAG, "key %u: %s", id, evt_name(evt));
+
+    const uint8_t ep = MACROPAD_MAP[id].zb_endpoint;
+
+    switch (evt) {
     case KEY_EVT_SINGLE:
-        ESP_LOGI(TAG, "key %u: single", id);
         macropad_zb_send(ep, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID);
         break;
     case KEY_EVT_DOUBLE:
-        ESP_LOGI(TAG, "key %u: double", id);
         macropad_zb_send(ep, ESP_ZB_ZCL_CMD_ON_OFF_ON_ID);
         break;
     case KEY_EVT_LONG:
-        ESP_LOGI(TAG, "key %u: long", id);
         macropad_zb_send(ep, ESP_ZB_ZCL_CMD_ON_OFF_OFF_ID);
         break;
-    case KEY_EVT_PRESS_UP:
-        ESP_LOGI(TAG, "key %u: released", id);
-        macropad_led_off();
+    default:
         break;
+    }
+}
+
+static bool handle_fn_key(uint8_t id, key_evt_t evt) {
+    if (id != MACROPAD_KEY_FN_ID)
+        return false;
+
+    // Enter FN on long-press; leave on release.
+    switch (evt) {
+    case KEY_EVT_LONG:
+        if (!s_is_fn) {
+            s_is_fn = true;
+            ESP_LOGI(TAG, "FN mode enabled");
+        }
+        return true;
+    case KEY_EVT_PRESS_UP:
+        if (s_is_fn) {
+            s_is_fn = false;
+            ESP_LOGI(TAG, "FN mode disabled");
+        }
+        return true;
+    default:
+        break;
+    }
+    return false;
+}
+
+static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
+    if (id >= MACROPAD_KEY_COUNT) {
+        ESP_LOGW(TAG, "key %u out of range, evt=%s", id, evt_name(evt));
+        return;
+    }
+
+    // Check whether to enable FN mode
+    if (handle_fn_key(id, evt))
+        return;
+
+    // handle proper layer
+    if (s_is_fn) {
+        handle_fn_layer(id, evt, ctx);
+    } else {
+        handle_nornal_layer(id, evt, ctx);
     }
 }
 
