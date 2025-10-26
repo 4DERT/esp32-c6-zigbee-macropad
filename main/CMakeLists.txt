@@ -10,5 +10,5 @@ set(ZCL_UTIL_PATH "/opt/esp-idf/examples/zigbee/common/zcl_utility")
 idf_component_register(
     SRCS ${SOURCES}
     INCLUDE_DIRS "." "${ZCL_UTIL_PATH}/include"
-    REQUIRES keys zigbee_core nvs_flash
+    REQUIRES keys zigbee_core ledstrip_fx nvs_flash
 )
