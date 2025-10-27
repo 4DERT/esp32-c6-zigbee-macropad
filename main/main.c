@@ -49,7 +49,14 @@ void app_main(void) {
     vTaskDelay(pdMS_TO_TICKS(4000));
     rainbow_params.period_ms = 120000;
     lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    lsfx_set_brightness(&mlsfx, 63);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    lsfx_set_brightness(&mlsfx, 127);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    lsfx_set_brightness(&mlsfx, 10);
     vTaskDelay(pdMS_TO_TICKS(4000));
+    lsfx_set_brightness(&mlsfx, 30);
     lsfx_set_fx(&mlsfx, &lsfx_fx_static_t, &static_params);
 }
 
