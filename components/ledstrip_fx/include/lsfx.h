@@ -34,4 +34,4 @@ typedef struct lsfx lsfx_t;
 */
 void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_config_t rmt_config);
 
-void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx);
+void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx, const void* fx_params);

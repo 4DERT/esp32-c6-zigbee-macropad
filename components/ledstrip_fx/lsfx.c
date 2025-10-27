@@ -14,6 +14,11 @@
 
 static const char* TAG = "LSFX";
 
+typedef struct {
+    const lsfx_fx_t* fx;
+    const void* params;
+} fx_with_params_t;
+
 // static _Thread_local struct lsfx* tls_self = NULL;
 static __thread lsfx_t* tls_self = NULL;
 
@@ -32,17 +37,17 @@ static void lsfx_task(void* params) {
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&self->strip_config, &self->rmt_config, &self->led_strip));
     ESP_LOGI(TAG, "Created LED strip object with RMT backend");
 
-    const lsfx_fx_t* fx = NULL;
-    const lsfx_fx_t* fx_tmp = NULL;
+    fx_with_params_t fx;
+    fx_with_params_t fx_tmp;
     uint32_t time = 0;
     while (true) {
         if(xQueueReceive(self->queue, &fx_tmp, 0) == pdTRUE){
             fx = fx_tmp;
 
-            ESP_LOGI(TAG, "Current FX: %s", fx->name);
+            ESP_LOGI(TAG, "Current FX: %s", fx.fx->name);
         }
         
-        fx->gen_frame(time, self->strip_config.max_leds, 255, NULL, lsfx_set_pixel_trampoline);
+        fx.fx->gen_frame(time, self->strip_config.max_leds, 255, fx.params, lsfx_set_pixel_trampoline);
         led_strip_refresh(self->led_strip);
         
         vTaskDelay(pdMS_TO_TICKS(20));
@@ -56,12 +61,17 @@ void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_conf
     self->strip_config = strip_config;
     self->rmt_config = rmt_config;
 
-    self->queue = xQueueCreate(8, sizeof(lsfx_fx_t*));
+    self->queue = xQueueCreate(8, sizeof(fx_with_params_t));
     xTaskCreate(lsfx_task, "lsfx", 2048, self, 1, &self->task);
 }
 
-void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx) {
-    if(xQueueSend(self->queue, &fx, 0) != pdTRUE){
+void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx, const void* fx_params) {
+    fx_with_params_t fx_with_params = {
+        .fx = fx,
+        .params = fx_params
+    };
+
+    if(xQueueSend(self->queue, &fx_with_params, 0) != pdTRUE){
         ESP_LOGE(TAG, "Unable to add FX to queue");
     }
 }

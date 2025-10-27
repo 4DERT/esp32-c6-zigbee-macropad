@@ -13,7 +13,15 @@ static void hsv2rgb(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, ui
 }
 
 static void gen_frame(uint32_t t_ms, uint32_t led_count, uint8_t brightness, const void* opt_params, set_pixel_f set_pixel) {
-    uint16_t hue = (t_ms % 2000) * 360 / 2000; // one hue round in 2s
+    uint32_t period_ms = 10000; // 10s
+    if (opt_params) {
+        const lsfx_rainbow_params_t* p = (const lsfx_rainbow_params_t*)opt_params;
+        if (p->period_ms)
+            period_ms = p->period_ms;
+    }
+
+    uint32_t t_local = t_ms % period_ms;
+    uint16_t hue = ((uint64_t)t_local * 360) / period_ms;
     uint8_t r, g, b;
 
     hsv2rgb(hue, 255, brightness, &r, &g, &b);

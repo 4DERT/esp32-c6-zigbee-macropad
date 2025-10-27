@@ -11,13 +11,13 @@
 #include "zb_core.h"
 // #include "macropad_led_strip.h"
 #include "lsfx.h"
-#include "lsfx_fx_rainbow.h"
 #include "lsfx_fx_police.h"
-
+#include "lsfx_fx_rainbow.h"
 
 static void init_nvs(void);
 
 lsfx_t mlsfx;
+lsfx_rainbow_params_t rainbow_params = {.period_ms = 1000};
 
 void app_main(void) {
     init_nvs();
@@ -26,24 +26,27 @@ void app_main(void) {
 
     // LED strip general initialization
     led_strip_config_t strip_config = {
-        .strip_gpio_num = 17,             // The GPIO that connected to the LED strip's data line
-        .max_leds = 10,                // The number of LEDs in the strip,
+        .strip_gpio_num = 17,                     // The GPIO that connected to the LED strip's data line
+        .max_leds = 10,                           // The number of LEDs in the strip,
         .led_pixel_format = LED_PIXEL_FORMAT_GRB, // Pixel format of your LED strip
         .led_model = LED_MODEL_WS2812,            // LED strip model
-        .flags.invert_out = false,     // whether to invert the output signal
+        .flags.invert_out = false,                // whether to invert the output signal
     };
 
     // LED strip backend configuration: RMT
     led_strip_rmt_config_t rmt_config = {
-        .clk_src = RMT_CLK_SRC_DEFAULT,        // different clock source can lead to different power consumption
+        .clk_src = RMT_CLK_SRC_DEFAULT,      // different clock source can lead to different power consumption
         .resolution_hz = (10 * 1000 * 1000), // RMT counter clock frequency
-        .flags.with_dma = false,               // DMA feature is available on ESP target like ESP32-S3
+        .flags.with_dma = false,             // DMA feature is available on ESP target like ESP32-S3
     };
 
     lsfx_init(&mlsfx, strip_config, rmt_config);
-    lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t);
+    lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
     vTaskDelay(pdMS_TO_TICKS(4000));
-    lsfx_set_fx(&mlsfx, &lsfx_fx_police_t);
+    lsfx_set_fx(&mlsfx, &lsfx_fx_police_t, NULL);
+    vTaskDelay(pdMS_TO_TICKS(4000));
+    rainbow_params.period_ms = 120000;
+    lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
 }
 
 /**
