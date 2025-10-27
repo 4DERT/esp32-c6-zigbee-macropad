@@ -16,6 +16,7 @@ struct lsfx {
     led_strip_config_t strip_config;
     led_strip_rmt_config_t rmt_config;
     uint8_t brightness;
+    bool enabled;
 };
 
 typedef struct lsfx lsfx_t;
@@ -43,3 +44,5 @@ void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_conf
 void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx, const void* fx_params);
 
 void lsfx_set_brightness(lsfx_t* self, uint8_t brightness);
+
+void lsfx_set_enabled(lsfx_t* self, bool enabled);

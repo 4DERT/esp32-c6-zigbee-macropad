@@ -58,6 +58,11 @@ void app_main(void) {
     vTaskDelay(pdMS_TO_TICKS(4000));
     lsfx_set_brightness(&mlsfx, 30);
     lsfx_set_fx(&mlsfx, &lsfx_fx_static_t, &static_params);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    lsfx_set_enabled(&mlsfx, false);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    lsfx_set_enabled(&mlsfx, true);
+    // vTaskDelay(pdMS_TO_TICKS(2000));
 }
 
 /**
