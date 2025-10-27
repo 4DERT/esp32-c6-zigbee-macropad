@@ -40,18 +40,30 @@ static void lsfx_task(void* params) {
     fx_with_params_t fx;
     fx_with_params_t fx_tmp;
     uint32_t time = 0;
+    TickType_t wait_ticks = portMAX_DELAY;
     while (true) {
-        if(xQueueReceive(self->queue, &fx_tmp, 0) == pdTRUE){
+        if(xQueueReceive(self->queue, &fx_tmp, wait_ticks) == pdTRUE){
+            // New effect
             fx = fx_tmp;
-
+            time = 0;
             ESP_LOGI(TAG, "Current FX: %s", fx.fx->name);
+
+            // Set first frame
+            fx.fx->gen_frame(time, self->strip_config.max_leds, 255, fx.params, lsfx_set_pixel_trampoline);
+            led_strip_refresh(self->led_strip);
+
+            // Decide how long wait
+            if(fx.fx->is_one_time) {
+                wait_ticks = portMAX_DELAY;
+            } else {
+                wait_ticks = pdMS_TO_TICKS(LSFX_FRAME_TIME_MS);
+            }
+        } else {
+            // This will occure when fx is animated
+            time += LSFX_FRAME_TIME_MS;
+            fx.fx->gen_frame(time, self->strip_config.max_leds, 255, fx.params, lsfx_set_pixel_trampoline);
+            led_strip_refresh(self->led_strip);
         }
-        
-        fx.fx->gen_frame(time, self->strip_config.max_leds, 255, fx.params, lsfx_set_pixel_trampoline);
-        led_strip_refresh(self->led_strip);
-        
-        vTaskDelay(pdMS_TO_TICKS(20));
-        time += 20;
     }
 }
 

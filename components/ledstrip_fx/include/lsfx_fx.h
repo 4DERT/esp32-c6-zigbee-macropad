@@ -9,5 +9,6 @@ typedef void (*lsfx_gen_frame_fn)(uint32_t t_ms, uint32_t led_count, uint8_t bri
 
 typedef struct {
     const char* name;
+    bool is_one_time;
     lsfx_gen_frame_fn gen_frame;
 } lsfx_fx_t;

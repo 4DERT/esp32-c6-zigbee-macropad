@@ -3,6 +3,7 @@
 #include "led_strip.h"
 #include "lsfx_fx.h"
 
+#define LSFX_FRAME_TIME_MS 20 // 20ms = 50FPS
 
 struct lsfx {
     led_strip_handle_t led_strip;

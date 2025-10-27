@@ -13,11 +13,13 @@
 #include "lsfx.h"
 #include "lsfx_fx_police.h"
 #include "lsfx_fx_rainbow.h"
+#include "lsfx_fx_static.h"
 
 static void init_nvs(void);
 
 lsfx_t mlsfx;
-lsfx_rainbow_params_t rainbow_params = {.period_ms = 1000};
+lsfx_fx_rainbow_params_t rainbow_params = {.period_ms = 1000};
+lsfx_fx_static_params_t static_params = {.red = 0, .green = 127, .blue = 255};
 
 void app_main(void) {
     init_nvs();
@@ -47,6 +49,8 @@ void app_main(void) {
     vTaskDelay(pdMS_TO_TICKS(4000));
     rainbow_params.period_ms = 120000;
     lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
+    vTaskDelay(pdMS_TO_TICKS(4000));
+    lsfx_set_fx(&mlsfx, &lsfx_fx_static_t, &static_params);
 }
 
 /**

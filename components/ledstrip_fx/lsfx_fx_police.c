@@ -24,5 +24,6 @@ static void gen_frame(uint32_t t_ms, uint32_t led_count, uint8_t brightness, con
 
 const lsfx_fx_t lsfx_fx_police_t = {
     .name = "police",
+    .is_one_time = false,
     .gen_frame = gen_frame,
 };
