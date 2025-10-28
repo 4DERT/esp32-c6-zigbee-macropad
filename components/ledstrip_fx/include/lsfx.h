@@ -17,6 +17,8 @@ struct lsfx {
     led_strip_rmt_config_t rmt_config;
     uint8_t brightness;
     bool enabled;
+    const lsfx_fx_t* fx;
+    const void* fx_params;
 };
 
 typedef struct lsfx lsfx_t;

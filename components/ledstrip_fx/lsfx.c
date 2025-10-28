@@ -49,8 +49,8 @@ static void lsfx_task(void* params) {
     ESP_LOGI(TAG, "Created LED strip object with RMT backend");
 
     lsfx_cmd_t cmd;
-    fx_with_params_t active_fx;
-    active_fx.fx = NULL;
+    // fx_with_params_t active_fx;
+    // active_fx.fx = NULL;
 
     uint32_t time = 0;
     TickType_t wait_ticks = portMAX_DELAY;
@@ -61,7 +61,7 @@ static void lsfx_task(void* params) {
         if (!self->enabled) {
             // DISABLED: Sleep indefinitely, waiting for any command (e.g., to enable)
             wait_ticks = portMAX_DELAY;
-        } else if (!active_fx.fx || active_fx.fx->is_one_time) {
+        } else if (!self->fx || self->fx->is_one_time) {
             // ENABLED, but static effect or no effect: Sleep indefinitely
             wait_ticks = portMAX_DELAY;
         } else {
@@ -76,9 +76,10 @@ static void lsfx_task(void* params) {
 
             if (cmd.type == LSFX_CMD_SET_FX) {
                 // New effect
-                active_fx = cmd.data.fx;
+                self->fx = cmd.data.fx.fx;
+                self->fx_params = cmd.data.fx.params;
                 time = 0;
-                ESP_LOGI(TAG, "Current FX: %s", active_fx.fx->name);
+                ESP_LOGI(TAG, "Current FX: %s", self->fx->name);
                 needs_refresh = true;
 
             } else if (cmd.type == LSFX_CMD_SET_BRIGHTNESS) {
@@ -94,9 +95,9 @@ static void lsfx_task(void* params) {
 
             // Refresh logic
             if (needs_refresh) {
-                if (self->enabled && active_fx.fx) {
+                if (self->enabled && self->fx) {
                     // Enabled and an effect is active -> render it
-                    active_fx.fx->gen_frame(time, self->strip_config.max_leds, self->brightness, active_fx.params, lsfx_set_pixel_trampoline);
+                    self->fx->gen_frame(time, self->strip_config.max_leds, self->brightness, self->fx_params, lsfx_set_pixel_trampoline);
                     led_strip_refresh(self->led_strip);
                 } else {
                     // Disabled or no effect
@@ -112,7 +113,7 @@ static void lsfx_task(void* params) {
             // 3. active_fx.fx->is_one_time == false
 
             time += LSFX_FRAME_TIME_MS;
-            active_fx.fx->gen_frame(time, self->strip_config.max_leds, self->brightness, active_fx.params, lsfx_set_pixel_trampoline);
+            self->fx->gen_frame(time, self->strip_config.max_leds, self->brightness, self->fx_params, lsfx_set_pixel_trampoline);
             led_strip_refresh(self->led_strip);
         }
     }
@@ -125,6 +126,7 @@ void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_conf
     self->rmt_config = rmt_config;
     self->brightness = LSFX_BRIGHTNESS_MAX;
     self->enabled = true;
+    self->fx = NULL;
 
     self->queue = xQueueCreate(8, sizeof(lsfx_cmd_t));
     xTaskCreate(lsfx_task, "lsfx", 2048, self, 1, &self->task);
