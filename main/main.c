@@ -52,6 +52,10 @@ void app_main(void) {
     lsfx_set_fx(mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
     vTaskDelay(pdMS_TO_TICKS(10000));
     lsfx_set_brightness(mlsfx, 63);
+    uint8_t brightness = lsfx_get_brightness(mlsfx);
+    bool enabled = lsfx_get_enabled(mlsfx);
+    lsfx_effect_binding_t fx_bind = lsfx_get_fx(mlsfx);
+    ESP_LOGI("MAIN", "brightness: %u, enalbed: %d, fx_name: %s\n", brightness, enabled, fx_bind.fx->name);
 }
 
 /**

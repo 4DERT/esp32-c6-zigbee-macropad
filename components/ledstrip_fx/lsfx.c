@@ -1,5 +1,7 @@
 #include "lsfx.h"
 
+#include <stdatomic.h>
+
 #include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_log.h"
@@ -16,27 +18,21 @@ static const char* TAG = "LSFX";
 
 typedef enum { LSFX_CMD_SET_FX, LSFX_CMD_SET_ENABLED, LSFX_CMD_SET_BRIGHTNESS } lsfx_cmd_type_t;
 
-typedef struct {
-    const lsfx_fx_t* fx;
-    const void* params;
-} fx_with_params_t;
-
 struct lsfx_t {
     led_strip_handle_t led_strip;
     TaskHandle_t task;
     QueueHandle_t queue;
     led_strip_config_t strip_config;
     led_strip_rmt_config_t rmt_config;
-    uint8_t brightness;
-    bool enabled;
-    const lsfx_fx_t* fx;
-    const void* fx_params;
+    _Atomic uint8_t brightness;
+    _Atomic bool enabled;
+    _Atomic lsfx_effect_binding_t active_fx;
 };
 
 typedef struct {
     lsfx_cmd_type_t type;
     union {
-        fx_with_params_t fx;
+        lsfx_effect_binding_t fx;
         uint8_t brightness;
         bool enabled;
     } data;
@@ -56,24 +52,20 @@ static void lsfx_task(void* params) {
     lsfx_handle_t self = (lsfx_handle_t)params;
     tls_self = self;
 
-    // LED Strip object handle
-    ESP_ERROR_CHECK(led_strip_new_rmt_device(&self->strip_config, &self->rmt_config, &self->led_strip));
-    ESP_LOGI(TAG, "Created LED strip object with RMT backend");
-
     lsfx_cmd_t cmd;
-    // fx_with_params_t active_fx;
-    // active_fx.fx = NULL;
-
     uint32_t time = 0;
     TickType_t wait_ticks = portMAX_DELAY;
 
     while (true) {
+        bool current_enabled = atomic_load(&self->enabled);
+        lsfx_effect_binding_t current_fx = atomic_load(&self->active_fx);
+        uint8_t current_brightness = atomic_load(&self->brightness);
 
         // Decide how long to wait in this iteration
-        if (!self->enabled) {
+        if (!current_enabled) {
             // DISABLED: Sleep indefinitely, waiting for any command (e.g., to enable)
             wait_ticks = portMAX_DELAY;
-        } else if (!self->fx || self->fx->is_one_time) {
+        } else if (!current_fx.fx || current_fx.fx->is_one_time) {
             // ENABLED, but static effect or no effect: Sleep indefinitely
             wait_ticks = portMAX_DELAY;
         } else {
@@ -88,28 +80,27 @@ static void lsfx_task(void* params) {
 
             if (cmd.type == LSFX_CMD_SET_FX) {
                 // New effect
-                self->fx = cmd.data.fx.fx;
-                self->fx_params = cmd.data.fx.params;
+                atomic_store(&self->active_fx, cmd.data.fx);
                 time = 0;
-                ESP_LOGI(TAG, "Current FX: %s", self->fx->name);
+                ESP_LOGI(TAG, "Current FX: %s", cmd.data.fx.fx->name);
                 needs_refresh = true;
 
             } else if (cmd.type == LSFX_CMD_SET_BRIGHTNESS) {
-                self->brightness = cmd.data.brightness;
-                ESP_LOGI(TAG, "Brightness set to: %u", self->brightness);
+                atomic_store(&self->brightness, cmd.data.brightness);
+                ESP_LOGI(TAG, "Brightness set to: %u", cmd.data.brightness);
                 needs_refresh = true;
 
             } else if (cmd.type == LSFX_CMD_SET_ENABLED) {
-                self->enabled = cmd.data.enabled;
-                ESP_LOGI(TAG, "Enabled set to: %d", self->enabled);
+                atomic_store(&self->enabled, cmd.data.enabled);
+                ESP_LOGI(TAG, "Enabled set to: %d", cmd.data.enabled);
                 needs_refresh = true;
             }
 
             // Refresh logic
             if (needs_refresh) {
-                if (self->enabled && self->fx) {
+                if (current_enabled && current_fx.fx) {
                     // Enabled and an effect is active -> render it
-                    self->fx->gen_frame(time, self->strip_config.max_leds, self->brightness, self->fx_params, lsfx_set_pixel_trampoline);
+                    current_fx.fx->gen_frame(time, self->strip_config.max_leds, current_brightness, current_fx.params, lsfx_set_pixel_trampoline);
                     led_strip_refresh(self->led_strip);
                 } else {
                     // Disabled or no effect
@@ -125,7 +116,7 @@ static void lsfx_task(void* params) {
             // 3. active_fx.fx->is_one_time == false
 
             time += LSFX_FRAME_TIME_MS;
-            self->fx->gen_frame(time, self->strip_config.max_leds, self->brightness, self->fx_params, lsfx_set_pixel_trampoline);
+            current_fx.fx->gen_frame(time, self->strip_config.max_leds, current_brightness, current_fx.params, lsfx_set_pixel_trampoline);
             led_strip_refresh(self->led_strip);
         }
     }
@@ -142,13 +133,22 @@ lsfx_handle_t lsfx_init(led_strip_config_t strip_config, led_strip_rmt_config_t 
 
     self->strip_config = strip_config;
     self->rmt_config = rmt_config;
-    self->brightness = LSFX_BRIGHTNESS_MAX;
-    self->enabled = true;
-    self->fx = NULL;
+
+    if((led_strip_new_rmt_device(&self->strip_config, &self->rmt_config, &self->led_strip)) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to create led_strip object");
+        free(self);
+        return NULL;
+    }
+
+    atomic_init(&self->brightness, LSFX_BRIGHTNESS_MAX);
+    atomic_init(&self->enabled, true);
+    lsfx_effect_binding_t initial_fx = {.fx = NULL, .params = NULL};
+    atomic_init(&self->active_fx, initial_fx);
 
     self->queue = xQueueCreate(8, sizeof(lsfx_cmd_t));
     if (self->queue == NULL) {
         ESP_LOGE(TAG, "Failed to create queue");
+        led_strip_del(self->led_strip);
         free(self);
         return NULL;
     }
@@ -159,6 +159,7 @@ lsfx_handle_t lsfx_init(led_strip_config_t strip_config, led_strip_rmt_config_t 
 
         // clean
         vQueueDelete(self->queue);
+        led_strip_del(self->led_strip);
         free(self);
         return NULL;
     }
@@ -188,6 +189,14 @@ void lsfx_set_fx(lsfx_handle_t self, const lsfx_fx_t* fx, const void* fx_params)
     }
 }
 
+lsfx_effect_binding_t lsfx_get_fx(lsfx_handle_t self) {
+    if (self == NULL) {
+        return (lsfx_effect_binding_t){.fx = NULL, .params = NULL};
+    }
+
+    return atomic_load(&self->active_fx);
+}
+
 void lsfx_set_brightness(lsfx_handle_t self, uint8_t brightness) {
     if (self == NULL)
         return;
@@ -199,6 +208,13 @@ void lsfx_set_brightness(lsfx_handle_t self, uint8_t brightness) {
     }
 }
 
+uint8_t lsfx_get_brightness(lsfx_handle_t self) {
+    if (self == NULL)
+        return 0;
+
+    return atomic_load(&self->brightness);
+}
+
 void lsfx_set_enabled(lsfx_handle_t self, bool enabled) {
     if (self == NULL)
         return;
@@ -208,4 +224,11 @@ void lsfx_set_enabled(lsfx_handle_t self, bool enabled) {
     if (xQueueSend(self->queue, &cmd, 0) != pdTRUE) {
         ESP_LOGE(TAG, "Unable to add enabled cmd to queue");
     }
+}
+
+bool lsfx_get_enabled(lsfx_handle_t self) {
+    if (self == NULL)
+        return false;
+
+    return atomic_load(&self->enabled);
 }

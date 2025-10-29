@@ -13,6 +13,11 @@
 struct lsfx_t;
 typedef struct lsfx_t* lsfx_handle_t;
 
+typedef struct {
+    const lsfx_fx_t* fx;
+    const void* params;
+} lsfx_effect_binding_t;
+
 /*
     // LED strip general initialization
     led_strip_config_t strip_config = {
@@ -32,11 +37,13 @@ typedef struct lsfx_t* lsfx_handle_t;
 
 */
 lsfx_handle_t lsfx_init(led_strip_config_t strip_config, led_strip_rmt_config_t rmt_config);
-
 void lsfx_deinit(lsfx_handle_t self);
 
 void lsfx_set_fx(lsfx_handle_t self, const lsfx_fx_t* fx, const void* fx_params);
+lsfx_effect_binding_t lsfx_get_fx(lsfx_handle_t self);
 
 void lsfx_set_brightness(lsfx_handle_t self, uint8_t brightness);
+uint8_t lsfx_get_brightness(lsfx_handle_t self);
 
 void lsfx_set_enabled(lsfx_handle_t self, bool enabled);
+bool lsfx_get_enabled(lsfx_handle_t self);
