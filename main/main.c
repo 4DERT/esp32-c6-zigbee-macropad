@@ -17,7 +17,8 @@
 
 static void init_nvs(void);
 
-lsfx_t mlsfx;
+// lsfx_t mlsfx;
+lsfx_handle_t mlsfx;
 lsfx_fx_rainbow_params_t rainbow_params = {.period_ms = 1000};
 lsfx_fx_static_params_t static_params = {.red = 0, .green = 127, .blue = 255};
 
@@ -42,27 +43,15 @@ void app_main(void) {
         .flags.with_dma = false,             // DMA feature is available on ESP target like ESP32-S3
     };
 
-    lsfx_init(&mlsfx, strip_config, rmt_config);
-    lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
+    mlsfx = lsfx_init(strip_config, rmt_config);
+    lsfx_set_fx(mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
     vTaskDelay(pdMS_TO_TICKS(4000));
-    lsfx_set_fx(&mlsfx, &lsfx_fx_police_t, NULL);
+    lsfx_set_fx(mlsfx, &lsfx_fx_police_t, NULL);
     vTaskDelay(pdMS_TO_TICKS(4000));
     rainbow_params.period_ms = 120000;
-    lsfx_set_fx(&mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    lsfx_set_brightness(&mlsfx, 63);
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    lsfx_set_brightness(&mlsfx, 127);
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    lsfx_set_brightness(&mlsfx, 10);
-    vTaskDelay(pdMS_TO_TICKS(4000));
-    lsfx_set_brightness(&mlsfx, 30);
-    lsfx_set_fx(&mlsfx, &lsfx_fx_static_t, &static_params);
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    lsfx_set_enabled(&mlsfx, false);
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    lsfx_set_enabled(&mlsfx, true);
-    // vTaskDelay(pdMS_TO_TICKS(2000));
+    lsfx_set_fx(mlsfx, &lsfx_fx_rainbow_t, &rainbow_params);
+    vTaskDelay(pdMS_TO_TICKS(10000));
+    lsfx_set_brightness(mlsfx, 63);
 }
 
 /**

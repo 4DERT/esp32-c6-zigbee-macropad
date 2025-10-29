@@ -21,6 +21,18 @@ typedef struct {
     const void* params;
 } fx_with_params_t;
 
+struct lsfx_t {
+    led_strip_handle_t led_strip;
+    TaskHandle_t task;
+    QueueHandle_t queue;
+    led_strip_config_t strip_config;
+    led_strip_rmt_config_t rmt_config;
+    uint8_t brightness;
+    bool enabled;
+    const lsfx_fx_t* fx;
+    const void* fx_params;
+};
+
 typedef struct {
     lsfx_cmd_type_t type;
     union {
@@ -31,7 +43,7 @@ typedef struct {
 } lsfx_cmd_t;
 
 // static _Thread_local struct lsfx* tls_self = NULL;
-static __thread lsfx_t* tls_self = NULL;
+static __thread lsfx_handle_t tls_self = NULL;
 
 // set pixel
 void lsfx_set_pixel_trampoline(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) {
@@ -41,7 +53,7 @@ void lsfx_set_pixel_trampoline(uint32_t index, uint8_t red, uint8_t green, uint8
 }
 
 static void lsfx_task(void* params) {
-    lsfx_t* self = (lsfx_t*)params;
+    lsfx_handle_t self = (lsfx_handle_t)params;
     tls_self = self;
 
     // LED Strip object handle
@@ -121,7 +133,13 @@ static void lsfx_task(void* params) {
 
 // public
 
-void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_config_t rmt_config) {
+lsfx_handle_t lsfx_init(led_strip_config_t strip_config, led_strip_rmt_config_t rmt_config) {
+    lsfx_handle_t self = (lsfx_handle_t)calloc(1, sizeof(struct lsfx_t));
+    if (self == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for lsfx_t");
+        return NULL;
+    }
+
     self->strip_config = strip_config;
     self->rmt_config = rmt_config;
     self->brightness = LSFX_BRIGHTNESS_MAX;
@@ -129,10 +147,40 @@ void lsfx_init(lsfx_t* self, led_strip_config_t strip_config, led_strip_rmt_conf
     self->fx = NULL;
 
     self->queue = xQueueCreate(8, sizeof(lsfx_cmd_t));
-    xTaskCreate(lsfx_task, "lsfx", 2048, self, 1, &self->task);
+    if (self->queue == NULL) {
+        ESP_LOGE(TAG, "Failed to create queue");
+        free(self);
+        return NULL;
+    }
+
+    BaseType_t task_created = xTaskCreate(lsfx_task, "lsfx", 2048, self, 1, &self->task);
+    if (task_created != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create lsfx task");
+
+        // clean
+        vQueueDelete(self->queue);
+        free(self);
+        return NULL;
+    }
+
+    ESP_LOGI(TAG, "LSFX instance created successfully");
+    return self;
 }
 
-void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx, const void* fx_params) {
+void lsfx_deinit(lsfx_handle_t self) {
+    if (self == NULL)
+        return;
+
+    vTaskDelete(self->task);
+    vQueueDelete(self->queue);
+    led_strip_del(self->led_strip);
+    free(self);
+}
+
+void lsfx_set_fx(lsfx_handle_t self, const lsfx_fx_t* fx, const void* fx_params) {
+    if (self == NULL)
+        return;
+
     lsfx_cmd_t cmd = {.type = LSFX_CMD_SET_FX, .data.fx = {.fx = fx, .params = fx_params}};
 
     if (xQueueSend(self->queue, &cmd, 0) != pdTRUE) {
@@ -140,7 +188,10 @@ void lsfx_set_fx(lsfx_t* self, const lsfx_fx_t* fx, const void* fx_params) {
     }
 }
 
-void lsfx_set_brightness(lsfx_t* self, uint8_t brightness) {
+void lsfx_set_brightness(lsfx_handle_t self, uint8_t brightness) {
+    if (self == NULL)
+        return;
+
     lsfx_cmd_t cmd = {.type = LSFX_CMD_SET_BRIGHTNESS, .data.brightness = brightness};
 
     if (xQueueSend(self->queue, &cmd, 0) != pdTRUE) {
@@ -148,7 +199,10 @@ void lsfx_set_brightness(lsfx_t* self, uint8_t brightness) {
     }
 }
 
-void lsfx_set_enabled(lsfx_t* self, bool enabled) {
+void lsfx_set_enabled(lsfx_handle_t self, bool enabled) {
+    if (self == NULL)
+        return;
+
     lsfx_cmd_t cmd = {.type = LSFX_CMD_SET_ENABLED, .data.enabled = enabled};
 
     if (xQueueSend(self->queue, &cmd, 0) != pdTRUE) {
