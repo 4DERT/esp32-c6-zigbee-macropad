@@ -4,8 +4,15 @@
 #include <stdint.h>
 
 static void gen_frame(uint32_t t_ms, uint32_t led_count, uint8_t brightness, const void* opt_params, set_pixel_f set_pixel) {
-    uint32_t phase = (t_ms / 1000) % 2; // 0 → blue, 1 → red
+    uint32_t period = 1000;
     uint8_t r, g, b;
+
+    if (opt_params) {
+        const lsfx_fx_police_params_t* p = (const lsfx_fx_police_params_t*)opt_params;
+        period = p->period_ms;
+    }
+
+    uint32_t phase = (t_ms / period) % 2; // 0 → blue, 1 → red
 
     if (phase == 0) {
         r = 0;

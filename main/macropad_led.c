@@ -48,10 +48,19 @@ static const effect_variant_t rainbow_variants[] = {
 };
 #define RAINBOW_VARIANTS_SIZE (sizeof(rainbow_variants) / sizeof(rainbow_variants[0]))
 
+// --- List of Variants for POLICE Effect ---
+static const effect_variant_t police_variants[] = {
+    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 100}, "100ms Period"},
+    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 200}, "200ms Period"},
+    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 400}, "400ms Period"},
+};
+#define POLICE_VARIANTS_SIZE (sizeof(police_variants) / sizeof(police_variants[0]))
+
 // --- THE MASTER EFFECT LIST  ---
 static const app_effect_t app_effects[] = {
     {"Static", static_variants, STATIC_VARIANTS_SIZE},
     {"Rainbow", rainbow_variants, RAINBOW_VARIANTS_SIZE},
+    {"Police", police_variants, POLICE_VARIANTS_SIZE},
 };
 #define NUM_EFFECTS (sizeof(app_effects) / sizeof(app_effects[0]))
 
