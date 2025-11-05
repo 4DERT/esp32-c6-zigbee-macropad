@@ -47,7 +47,7 @@ void on_zbc_endpoint_attribute_set(const esp_zb_zcl_set_attr_value_message_t* me
     uint16_t cluster = message->info.cluster;
 
     if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
-        macropad_led_blink();
+        // macropad_led_blink();
     }
 
     ESP_LOGI(TAG, "Attribute set: ep: %u, cl: %u", endpoint, cluster);

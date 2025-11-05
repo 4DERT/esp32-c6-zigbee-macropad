@@ -33,3 +33,7 @@ static const macropad_map_t MACROPAD_MAP[] = {
 #define ARRAY_LEN(x) ((uint32_t)(sizeof(x) / sizeof((x)[0])))
 #define MACROPAD_KEY_COUNT ((uint8_t)ARRAY_LEN(MACROPAD_MAP))
 #define MACROPAD_KEY_FN_ID 5
+#define MACROPAD_KEY_FN_ON_OFF_ID 0
+#define MACROPAD_KEY_FN_CYCLE_BRIGHTNESS_ID 1
+#define MACROPAD_KEY_FN_CYCLE_FX_ID 3
+#define MACROPAD_KEY_FN_CYCLE_VARIANT_ID 4

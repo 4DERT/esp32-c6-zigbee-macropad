@@ -1,10 +1,11 @@
 #pragma once
 
-#define MACROPAD_LED_GPIO CONFIG_MACROPAD_LED_GPIO
-#define MACROPAD_LED_ACTIVE CONFIG_MACROPAD_LED_ACTIVE_STATE
-#define MACROPAD_LED_BLINK_MS CONFIG_MACROPAD_CONNECT_BLINK_MS
+#define MACROPAD_LED_GPIO 17
+#define MACROPAD_LED_NUM 10
 
 void macropad_led_init();
-void macropad_led_on();
-void macropad_led_off();
-void macropad_led_blink();
+void macropad_led_toggle_enabled(); // key 1
+void macropad_led_cycle_effects(); // key 2
+void macropad_led_cycle_effect_variants(); // key 3
+void macropad_led_cycle_brightness(); // key 4
+// void macropad_led_toggle_timer(); // key 5

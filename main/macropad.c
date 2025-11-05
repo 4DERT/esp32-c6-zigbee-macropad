@@ -28,10 +28,21 @@ static void handle_fn_layer(uint8_t id, key_evt_t evt, void* ctx) {
     if (evt == KEY_EVT_PRESS_DOWN || evt == KEY_EVT_PRESS_UP)
         ESP_LOGI(TAG, "fn+key %u: %s", id, evt_name(evt));
 
-    switch (evt) {
-    case KEY_EVT_PRESS_DOWN:
+    if (evt != KEY_EVT_PRESS_DOWN)
+        return;
+
+    switch (id) {
+    case MACROPAD_KEY_FN_ON_OFF_ID:
+        macropad_led_toggle_enabled();
         break;
-    case KEY_EVT_PRESS_UP:
+    case MACROPAD_KEY_FN_CYCLE_BRIGHTNESS_ID:
+        macropad_led_cycle_brightness();
+        break;
+    case MACROPAD_KEY_FN_CYCLE_FX_ID:
+        macropad_led_cycle_effects();
+        break;
+    case MACROPAD_KEY_FN_CYCLE_VARIANT_ID:
+        macropad_led_cycle_effect_variants();
         break;
     default:
         break;
@@ -143,7 +154,7 @@ esp_err_t macropad_init() {
     macropad_zb_start();
 
     while (!macropad_zb_is_connected()) {
-        macropad_led_blink();
+        // macropad_led_blink();
     }
 
     ESP_LOGI(TAG, "Zigbee connected!");
