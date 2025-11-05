@@ -98,6 +98,10 @@ static void lsfx_task(void* params) {
 
             // Refresh logic
             if (needs_refresh) {
+                current_enabled = atomic_load(&self->enabled);
+                current_fx = atomic_load(&self->active_fx);
+                current_brightness = atomic_load(&self->brightness);
+
                 if (current_enabled && current_fx.fx) {
                     // Enabled and an effect is active -> render it
                     current_fx.fx->gen_frame(time, self->strip_config.max_leds, current_brightness, current_fx.params, lsfx_set_pixel_trampoline);
