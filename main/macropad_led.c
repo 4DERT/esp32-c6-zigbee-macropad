@@ -4,6 +4,7 @@
 #include "freertos/FreeRTOS.h"
 
 #include "lsfx.h"
+#include "lsfx_fx_bicolor.h"
 #include "lsfx_fx_police.h"
 #include "lsfx_fx_rainbow.h"
 #include "lsfx_fx_static.h"
@@ -56,11 +57,78 @@ static const effect_variant_t police_variants[] = {
 };
 #define POLICE_VARIANTS_SIZE (sizeof(police_variants) / sizeof(police_variants[0]))
 
+// --- List of Variants for BICOLOR Effect ---
+// clang-format off
+static const effect_variant_t bicolor_variants[] = {
+    // 1. Warm sunset gradient (red → orange)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 255, .g1 = 64,  .b1 = 0,      // top: deep orange-red
+        .r2 = 255, .g2 = 180, .b2 = 64 },   // bottom: warm amber
+      "sunset glow" },
+
+    // 2. Ocean tones (turquoise → deep blue)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 0,   .g1 = 255, .b1 = 180,    // top: aqua turquoise
+        .r2 = 0,   .g2 = 64,  .b2 = 255 },  // bottom: deep ocean blue
+      "ocean" },
+
+    // 3. Aurora colors (green → purple)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 0,   .g1 = 255, .b1 = 128,    // top: vivid green-blue
+        .r2 = 128, .g2 = 0,   .b2 = 255 },  // bottom: magenta-purple
+      "aurora" },
+
+    // 4. Cyberpunk neon (pink → blue)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 255, .g1 = 0,   .b1 = 128,    // top: magenta-pink
+        .r2 = 0,   .g2 = 128, .b2 = 255 },  // bottom: neon blue
+      "synthwave" },
+
+    // 5. Ice & fire contrast (blue → orange)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 0,   .g1 = 64,  .b1 = 255,    // top: cold blue
+        .r2 = 255, .g2 = 128, .b2 = 0 },    // bottom: warm orange
+      "ice & fire" },
+
+    // 6. Forest shades (dark green → light green)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 0,   .g1 = 80,  .b1 = 0,      // top: deep green
+        .r2 = 64,  .g2 = 255, .b2 = 64 },   // bottom: bright green
+      "forest" },
+
+    // 7. Twilight mood (navy → pink)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 32,  .g1 = 0,   .b1 = 128,    // top: dark navy
+        .r2 = 255, .g2 = 64,  .b2 = 128 },  // bottom: warm pink
+      "twilight" },
+
+    // 8. Cool neutral (white → blue)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 255, .g1 = 255, .b1 = 255,    // top: pure white
+        .r2 = 64,  .g2 = 128, .b2 = 255 },  // bottom: cool blue
+      "white-blue" },
+
+    // 9. Royal contrast (gold → violet)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 255, .g1 = 200, .b1 = 64,     // top: gold
+        .r2 = 160, .g2 = 0,   .b2 = 255 },  // bottom: violet
+      "royal" },
+
+    // 10. Classic red-blue look
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 255, .g1 = 0,   .b1 = 0,      // top: red
+        .r2 = 0,   .g2 = 0,   .b2 = 255 },  // bottom: blue
+      "red-blue" },
+};
+// clang-format on
+#define BICOLOR_VARIANTS_SIZE (sizeof(bicolor_variants) / sizeof(bicolor_variants[0]))
+
 // --- THE MASTER EFFECT LIST  ---
 static const app_effect_t app_effects[] = {
     {"Static", static_variants, STATIC_VARIANTS_SIZE},
     {"Rainbow", rainbow_variants, RAINBOW_VARIANTS_SIZE},
     {"Police", police_variants, POLICE_VARIANTS_SIZE},
+    {"BiColor", bicolor_variants, BICOLOR_VARIANTS_SIZE},
 };
 #define NUM_EFFECTS (sizeof(app_effects) / sizeof(app_effects[0]))
 
@@ -127,7 +195,7 @@ void macropad_led_toggle_enabled() {
 }
 
 void macropad_led_cycle_effects() {
-    current_effect_index  = (current_effect_index + 1) % NUM_EFFECTS;
+    current_effect_index = (current_effect_index + 1) % NUM_EFFECTS;
     current_variant_index = 0;
 
     apply_current_fx();
