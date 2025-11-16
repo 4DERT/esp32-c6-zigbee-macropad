@@ -9,6 +9,9 @@
 #include "lsfx_fx_rainbow.h"
 #include "lsfx_fx_static.h"
 
+#define MACROPAD_LED_GPIO CONFIG_MACROPAD_ADDRESSABLE_LED_GPIO
+#define MACROPAD_LED_NUM CONFIG_MACROPAD_LED_NUM
+
 static const char* TAG = "LED_CTRL";
 
 // 2D DATA STRUCTURE (EFFECTS -> VARIANTS)

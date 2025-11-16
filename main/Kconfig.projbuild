@@ -12,18 +12,45 @@ config MACROPAD_MODEL_IDENTIFIER
     help
       ZCL Basic attribute (string). Leave empty to skip setting.
 
-config MACROPAD_LED_NUM
-    int "Number of status LEDs"
-    default 10
-    range 1 255
+choice MACROPAD_LED_DRIVER
+    prompt "Macropad LED Driver"
+    default MACROPAD_LED_DRIVER_GPIO
     help
-      Number of status LEDs available on the macropad.
+        Select the type of LED driver to compile.
 
-config MACROPAD_LED_GPIO
-    int "LEDs GPIO"
+    config MACROPAD_LED_DRIVER_WS2812
+        bool "Addressable LEDs (WS2812)"
+        help
+            Use the WS2812 addressable LEDs.
+
+    config MACROPAD_LED_DRIVER_GPIO
+        bool "Simple GPIO LED"
+        help
+            Use a single GPIO for basic on/off. Effects will be disabled.
+
+endchoice
+
+config MACROPAD_ADDRESSABLE_LED_GPIO
+    int "Addressable LEDs GPIO Pin"
+    depends on MACROPAD_LED_DRIVER_WS2812
     default 17
     help
       GPIO for WS2812 LEDs.
+
+config MACROPAD_LED_NUM
+    int "Number of addressable LEDs"
+    depends on MACROPAD_LED_DRIVER_WS2812
+    default 10
+    range 1 255
+    help
+      Number of addressable LEDs available on the macropad LED strip.
+
+config MACROPAD_LED_GPIO 
+    int "LED GPIO Pin"
+    depends on MACROPAD_LED_DRIVER_GPIO
+    default 15 
+    help 
+        GPIO for the simple status LED.
 
 config MACROPAD_KEYS_NUM
     int "Number of keys"
