@@ -1,22 +1,5 @@
 menu "Macropad"
 
-config MACROPAD_LED_GPIO
-    int "Status LED GPIO"
-    default 15
-    help
-      GPIO for status LED.
-
-config MACROPAD_LED_ACTIVE_STATE
-    int "Status LED active state"
-    default 1
-    help
-        Set the active state for the status LED. Use 0 for active low, 1 for active high.
-
-config MACROPAD_CONNECT_BLINK_MS
-    int "Connect blink period (ms)"
-    default 100
-    range 10 500
-
 config MACROPAD_MANUFACTURER_NAME
     string "ZCL Basic: Manufacturer Name"
     default "4DERT"
@@ -28,6 +11,19 @@ config MACROPAD_MODEL_IDENTIFIER
     default "Macropad"
     help
       ZCL Basic attribute (string). Leave empty to skip setting.
+
+config MACROPAD_LED_NUM
+    int "Number of status LEDs"
+    default 10
+    range 1 255
+    help
+      Number of status LEDs available on the macropad.
+
+config MACROPAD_LED_GPIO
+    int "LEDs GPIO"
+    default 17
+    help
+      GPIO for WS2812 LEDs.
 
 config MACROPAD_KEYS_NUM
     int "Number of keys"
