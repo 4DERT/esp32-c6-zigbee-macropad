@@ -34,6 +34,7 @@ static void handle_fn_layer(uint8_t id, key_evt_t evt, void* ctx) {
     switch (id) {
     case MACROPAD_KEY_FN_ON_OFF_ID:
         macropad_led_toggle_enabled();
+        macropad_zb_update_light_status(macropad_led_get_enabled());
         break;
     case MACROPAD_KEY_FN_CYCLE_BRIGHTNESS_ID:
         macropad_led_cycle_brightness();
@@ -140,6 +141,9 @@ esp_err_t macropad_init() {
             ESP_RETURN_ON_ERROR(macropad_zb_create_endpoint(MACROPAD_MAP[i].zb_endpoint), TAG, "create_endpoint failed");
         }
     }
+
+    // Add Light endpoint
+    ESP_RETURN_ON_ERROR(macropad_zb_create_light_endpoint(MACROPAD_LIGHT_EP), TAG, "Light endpoint failed");
 
     // Build Keys GPIO array
     static gpio_num_t keys_gpio[MACROPAD_KEY_COUNT];

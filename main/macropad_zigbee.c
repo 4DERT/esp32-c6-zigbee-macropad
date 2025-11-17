@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "macropad_led.h"
+#include "macropad_map.h"
 #include "zb_core.h"
 
 static const char* TAG = "Macropad_Zigbee";
@@ -45,8 +46,15 @@ static const char* cmd_str(esp_zb_zcl_on_off_cmd_id_t cmd) {
 void on_zbc_endpoint_attribute_set(const esp_zb_zcl_set_attr_value_message_t* message) {
     uint8_t endpoint = message->info.dst_endpoint;
     uint16_t cluster = message->info.cluster;
+    uint16_t attribute = message->attribute.id;
 
-    if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
+    if (endpoint == MACROPAD_LIGHT_EP && cluster == ESP_ZB_ZCL_CLUSTER_ID_ON_OFF && attribute == ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID) {
+        bool light_state = *(bool*)message->attribute.data.value;
+        macropad_led_set_enabled(light_state);
+        ESP_LOGI(TAG, "Light set to: %s", light_state ? "ON" : "OFF");
+    }
+
+    else if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
         // macropad_led_blink();
     }
 
@@ -121,4 +129,63 @@ esp_err_t macropad_zb_create_endpoint(uint8_t endpoint) {
     esp_zb_cluster_list_add_on_off_cluster(cl, esp_zb_on_off_cluster_create(NULL), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
 
     return zbc_register_endpoint(&ep_cfg, cl, on_zbc_endpoint_attribute_set);
+}
+
+esp_err_t macropad_zb_create_light_endpoint(uint8_t endpoint) {
+    // Endpoint configuration for an On/Off Light
+    esp_zb_endpoint_config_t ep_cfg = {
+        .endpoint = endpoint,
+        .app_profile_id = ESP_ZB_AF_HA_PROFILE_ID,
+        .app_device_id = ESP_ZB_HA_ON_OFF_LIGHT_DEVICE_ID, // Device ID for Light (0x0100)
+        .app_device_version = 0,
+    };
+
+    // Configuration for Basic and Identify clusters
+    esp_zb_basic_cluster_cfg_t basic_cfg = {
+        .zcl_version = ESP_ZB_ZCL_BASIC_ZCL_VERSION_DEFAULT_VALUE,
+        .power_source = ESP_ZB_ZCL_BASIC_POWER_SOURCE_DEFAULT_VALUE,
+    };
+
+    esp_zb_identify_cluster_cfg_t identify_cfg = {
+        .identify_time = ESP_ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE,
+    };
+
+    // Configuration for On/Off cluster (default state)
+    esp_zb_on_off_cluster_cfg_t on_off_cfg = {
+        .on_off = 0, // Default off
+    };
+
+    esp_zb_cluster_list_t* cl = esp_zb_zcl_cluster_list_create();
+
+    // Server clusters (Device acts as the executor)
+
+    // Basic and Identify are mandatory for all devices
+    esp_zb_cluster_list_add_basic_cluster(cl, esp_zb_basic_cluster_create(&basic_cfg), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+    esp_zb_cluster_list_add_identify_cluster(cl, esp_zb_identify_cluster_create(&identify_cfg), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+
+    // Crucial for Light: On/Off cluster must be SERVER role to receive commands
+    esp_zb_cluster_list_add_on_off_cluster(cl, esp_zb_on_off_cluster_create(&on_off_cfg), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+
+    // Set BASIC attributes (Manufacturer & Model)
+    esp_zb_attribute_list_t* basic_srv = esp_zb_cluster_list_get_cluster(cl, ESP_ZB_ZCL_CLUSTER_ID_BASIC, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
+    if (basic_srv) {
+        esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, (void*)s_manufacturer);
+        esp_zb_basic_cluster_add_attr(basic_srv, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (void*)s_model);
+    }
+
+    // Register the endpoint with the cluster list and callback
+    return zbc_register_endpoint(&ep_cfg, cl, on_zbc_endpoint_attribute_set);
+}
+
+void macropad_zb_update_light_status(bool is_enabled) {
+    esp_zb_lock_acquire(portMAX_DELAY);
+
+    esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(MACROPAD_LIGHT_EP, ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
+                                                              ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID, &is_enabled, false);
+
+    if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
+        ESP_LOGE(TAG, "Failed to update Zigbee attribute: 0x%x", status);
+    }
+
+    esp_zb_lock_release();
 }

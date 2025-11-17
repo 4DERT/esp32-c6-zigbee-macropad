@@ -197,6 +197,16 @@ void macropad_led_toggle_enabled() {
     log_state("Toggle: ");
 }
 
+void macropad_led_set_enabled(bool state) {
+    is_enabled = state;
+    lsfx_set_enabled(mlsfx, is_enabled);
+    log_state("ENABLED: ");
+}
+
+inline bool macropad_led_get_enabled() {
+    return is_enabled;
+}
+
 void macropad_led_cycle_effects() {
     current_effect_index = (current_effect_index + 1) % NUM_EFFECTS;
     current_variant_index = 0;

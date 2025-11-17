@@ -112,4 +112,8 @@ config MACROPAD_KEY5_EP
     default 6
 endif
 
+config MACROPAD_LIGHT_EP
+    int "Light Zigbee Endpoint"
+    default 7
+
 endmenu

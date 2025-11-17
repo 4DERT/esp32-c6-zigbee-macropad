@@ -22,6 +22,16 @@ void macropad_led_toggle_enabled() {
     ESP_LOGI(TAG, "Built-in LED state: %s", is_enabled ? "ON" : "OFF");
 }
 
+void macropad_led_set_enabled(bool state) {
+    is_enabled = state;
+    gpio_set_level(MACROPAD_LED_GPIO, is_enabled);
+    ESP_LOGI(TAG, "Built-in LED state: %s", is_enabled ? "ON" : "OFF");
+}
+
+inline bool macropad_led_get_enabled() {
+    return is_enabled;
+}
+
 // --- Empty functions (stubs) ---
 void macropad_led_cycle_effects() {
     ESP_LOGD(TAG, "CycleEffect: No-op (single LED mode)");
