@@ -161,6 +161,7 @@ esp_err_t macropad_init() {
         // macropad_led_blink();
     }
 
+    macropad_zb_update_light_status(macropad_led_get_enabled());
     ESP_LOGI(TAG, "Zigbee connected!");
     return ESP_OK;
 }
