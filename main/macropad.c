@@ -53,6 +53,11 @@ static void handle_fn_layer(uint8_t id, key_evt_t evt, void* ctx) {
 }
 
 static void handle_nornal_layer(uint8_t id, key_evt_t evt, void* ctx) {
+#if MACROPAD_FN_ON_LONG_PRESS == 0
+    if(MACROPAD_KEY_FN_ID == id)
+        return;
+#endif
+
     if (evt != KEY_EVT_PRESS_DOWN && evt != KEY_EVT_PRESS_UP)
         ESP_LOGI(TAG, "key %u: %s", id, evt_name(evt));
 
@@ -79,7 +84,11 @@ static bool handle_fn_key(uint8_t id, key_evt_t evt) {
 
     // Enter FN on long-press; leave on release.
     switch (evt) {
+#if MACROPAD_FN_ON_LONG_PRESS == 1
     case KEY_EVT_LONG:
+#else
+    case KEY_EVT_PRESS_DOWN:
+#endif
         if (!s_is_fn) {
             s_is_fn = true;
             ESP_LOGI(TAG, "FN mode enabled");

@@ -116,4 +116,26 @@ config MACROPAD_LIGHT_EP
     int "Light Zigbee Endpoint"
     default 7
 
+choice MACROPAD_FN_MODE
+    prompt "FN Key Behavior"
+    default MACROPAD_FN_MODE_CLASSIC
+    help
+        Select how the FN key behaves.
+
+    config MACROPAD_FN_MODE_CLASSIC
+        bool "Classic (Shift-like)"
+        help
+            FN works like a 'Shift' key.
+            - Press down: Activates FN layer immediately.
+            - Release: Deactivates FN layer.
+            - The FN key itself sends NO Zigbee commands.
+
+    config MACROPAD_FN_MODE_DUAL
+        bool "Dual Mode (Hold for FN)"
+        help
+            FN key has two functions:
+            - Short Press / Double Click: Sends Zigbee commands.
+            - Long Press (Hold): Activates FN layer.
+endchoice
+
 endmenu

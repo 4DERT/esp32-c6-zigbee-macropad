@@ -38,3 +38,7 @@ static const macropad_map_t MACROPAD_MAP[] = {
 #define MACROPAD_KEY_FN_CYCLE_FX_ID 3
 #define MACROPAD_KEY_FN_CYCLE_VARIANT_ID 4
 #define MACROPAD_LIGHT_EP CONFIG_MACROPAD_LIGHT_EP
+
+// 0: CLASSIC MODE - FN works like 'Shift'. Press down to activate layer immediately. FN key sends NO Zigbee commands.
+// 1: DUAL MODE    - Hold FN to activate layer. Short press or double sends Zigbee command (Toggle).
+#define MACROPAD_FN_ON_LONG_PRESS CONFIG_MACROPAD_FN_MODE
