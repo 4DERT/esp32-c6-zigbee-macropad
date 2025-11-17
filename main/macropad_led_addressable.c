@@ -46,17 +46,17 @@ static const effect_variant_t static_variants[] = {
 
 // --- List of Variants for RAINBOW Effect ---
 static const effect_variant_t rainbow_variants[] = {
+    {&lsfx_fx_rainbow_t, &(const lsfx_fx_rainbow_params_t){.period_ms = 45000}, "45s Period"},
+    {&lsfx_fx_rainbow_t, &(const lsfx_fx_rainbow_params_t){.period_ms = 25000}, "25s Period"},
     {&lsfx_fx_rainbow_t, &(const lsfx_fx_rainbow_params_t){.period_ms = 2000}, "2s Period"},
-    {&lsfx_fx_rainbow_t, &(const lsfx_fx_rainbow_params_t){.period_ms = 30000}, "30s Period"},
-    {&lsfx_fx_rainbow_t, &(const lsfx_fx_rainbow_params_t){.period_ms = 60000}, "60s Period"},
 };
 #define RAINBOW_VARIANTS_SIZE (sizeof(rainbow_variants) / sizeof(rainbow_variants[0]))
 
 // --- List of Variants for POLICE Effect ---
 static const effect_variant_t police_variants[] = {
-    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 100}, "100ms Period"},
-    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 200}, "200ms Period"},
     {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 400}, "400ms Period"},
+    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 200}, "200ms Period"},
+    {&lsfx_fx_police_t, &(const lsfx_fx_police_params_t){.period_ms = 100}, "100ms Period"},
 };
 #define POLICE_VARIANTS_SIZE (sizeof(police_variants) / sizeof(police_variants[0]))
 
@@ -99,39 +99,45 @@ static const effect_variant_t bicolor_variants[] = {
         .r2 = 64,  .g2 = 255, .b2 = 64 },   // bottom: bright green
       "forest" },
 
-    // 7. Twilight mood (navy → pink)
-    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
-        .r1 = 32,  .g1 = 0,   .b1 = 128,    // top: dark navy
-        .r2 = 255, .g2 = 64,  .b2 = 128 },  // bottom: warm pink
-      "twilight" },
-
-    // 8. Cool neutral (white → blue)
-    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
-        .r1 = 255, .g1 = 255, .b1 = 255,    // top: pure white
-        .r2 = 64,  .g2 = 128, .b2 = 255 },  // bottom: cool blue
-      "white-blue" },
-
-    // 9. Royal contrast (gold → violet)
-    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
-        .r1 = 255, .g1 = 200, .b1 = 64,     // top: gold
-        .r2 = 160, .g2 = 0,   .b2 = 255 },  // bottom: violet
-      "royal" },
-
-    // 10. Classic red-blue look
+    // 7. Classic red-blue look
     { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
         .r1 = 255, .g1 = 0,   .b1 = 0,      // top: red
         .r2 = 0,   .g2 = 0,   .b2 = 255 },  // bottom: blue
       "red-blue" },
+
+    // 8. Mystic Grape (purple → turquoise)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 110, .g1 = 0,   .b1 = 160,    // top: grape purple
+        .r2 = 0,   .g2 = 200, .b2 = 200 },  // bottom: turquoise
+      "mystic grape" },
+
+    // 9. Lava Pulse (deep red → gold)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 180, .g1 = 0,   .b1 = 0,      // top: deep red
+        .r2 = 255, .g2 = 180, .b2 = 40 },   // bottom: warm gold
+      "lava pulse" },
+
+    // 10. Arctic Mist (icy white → teal)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 230, .g1 = 255, .b1 = 255,    // top: icy white
+        .r2 = 0,   .g2 = 150, .b2 = 180 },  // bottom: dark cyan/teal
+      "arctic mist" },
+
+    // 11. Limeberry (lime → neon purple)
+    { &lsfx_fx_bicolor_t, &(const lsfx_fx_bicolor_params_t){
+        .r1 = 150, .g1 = 255, .b1 = 0,      // top: electric lime
+        .r2 = 200, .g2 = 0,   .b2 = 255 },  // bottom: neon purple
+      "limeberry" },
 };
 // clang-format on
 #define BICOLOR_VARIANTS_SIZE (sizeof(bicolor_variants) / sizeof(bicolor_variants[0]))
 
 // --- THE MASTER EFFECT LIST  ---
 static const app_effect_t app_effects[] = {
-    {"Static", static_variants, STATIC_VARIANTS_SIZE},
     {"Rainbow", rainbow_variants, RAINBOW_VARIANTS_SIZE},
-    {"Police", police_variants, POLICE_VARIANTS_SIZE},
+    {"Static", static_variants, STATIC_VARIANTS_SIZE},
     {"BiColor", bicolor_variants, BICOLOR_VARIANTS_SIZE},
+    {"Police", police_variants, POLICE_VARIANTS_SIZE},
 };
 #define NUM_EFFECTS (sizeof(app_effects) / sizeof(app_effects[0]))
 
@@ -143,7 +149,7 @@ static const uint8_t brightness_levels[] = {9, 21, 49, 84, 135, 199, 255};
 static lsfx_handle_t mlsfx;
 static uint8_t current_effect_index = 0;  // Index for app_effects
 static uint8_t current_variant_index = 0; // Index for ..._variants
-static uint8_t current_brightness_index = BRIGHTNESS_LEVELS_NUM - 1;
+static uint8_t current_brightness_index = BRIGHTNESS_LEVELS_NUM / 2 + 1;
 static bool is_enabled = false;
 
 static inline void apply_current_fx(void) {
