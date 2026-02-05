@@ -28,8 +28,7 @@
 			"settings": {},
 			"extensions": [
 				"ms-vscode.cpptools-extension-pack",
-				"ms-vscode.cmake-tools",
-				"Harry-Ross-Software.c-snippets"
+				"ms-vscode.cmake-tools"
 			]
 		}
 	}

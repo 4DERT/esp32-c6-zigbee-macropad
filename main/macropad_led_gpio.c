@@ -9,7 +9,7 @@ static const char* TAG = "LED_CTRL_GPIO";
 static bool is_enabled = false;
 
 void macropad_led_init() {
-    ESP_LOGI(TAG, "Initializing Built-in LED on GPIO %d", MACROPAD_LED_GPIO);
+    ESP_LOGI(TAG, "Initializing LED on GPIO %d", MACROPAD_LED_GPIO);
 
     gpio_set_direction(MACROPAD_LED_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(MACROPAD_LED_GPIO, 0);
@@ -18,14 +18,14 @@ void macropad_led_init() {
 
 void macropad_led_toggle_enabled() {
     is_enabled = !is_enabled;
-    gpio_set_level(MACROPAD_LED_GPIO, is_enabled ? 1 : 0);
-    ESP_LOGI(TAG, "Built-in LED state: %s", is_enabled ? "ON" : "OFF");
+    gpio_set_level(MACROPAD_LED_GPIO, is_enabled);
+    ESP_LOGI(TAG, "LED state: %s", is_enabled ? "ON" : "OFF");
 }
 
 void macropad_led_set_enabled(bool state) {
     is_enabled = state;
     gpio_set_level(MACROPAD_LED_GPIO, is_enabled);
-    ESP_LOGI(TAG, "Built-in LED state: %s", is_enabled ? "ON" : "OFF");
+    ESP_LOGI(TAG, "LED state: %s", is_enabled ? "ON" : "OFF");
 }
 
 inline bool macropad_led_get_enabled() {
