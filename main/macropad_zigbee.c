@@ -195,8 +195,26 @@ void macropad_zb_update_light_status(bool is_enabled) {
                                                               ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID, &is_enabled, false);
 
     if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
-        ESP_LOGE(TAG, "Failed to update Zigbee attribute: 0x%x", status);
+        ESP_LOGE(TAG, "Failed to set OnOff attribute: 0x%x", status);
+        esp_zb_lock_release();
+        return;
     }
+
+    // Send report
+    esp_zb_zcl_report_attr_cmd_t report = {
+        .zcl_basic_cmd = {
+            .src_endpoint = MACROPAD_LIGHT_EP,
+            .dst_endpoint = 1,                     // ZHA coordinator endpoint
+            .dst_addr_u.addr_short = 0x0000,       // coordinator
+        },
+        .address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+        .clusterID = ESP_ZB_ZCL_CLUSTER_ID_ON_OFF,
+        .attributeID = ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID,
+        .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI,
+        .dis_default_resp = 1,
+    };
+
+    esp_zb_zcl_report_attr_cmd_req(&report);
 
     esp_zb_lock_release();
 }
