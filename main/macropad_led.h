@@ -10,3 +10,5 @@ void macropad_led_cycle_effects(); // key 2
 void macropad_led_cycle_effect_variants(); // key 3
 void macropad_led_cycle_brightness(); // key 4
 // void macropad_led_toggle_timer(); // key 5
+void macropad_led_start_loading();
+void macropad_led_stop_loading();

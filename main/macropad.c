@@ -133,6 +133,7 @@ static void on_key(uint8_t id, key_evt_t evt, void* ctx) {
 esp_err_t macropad_init() {
     // init LED
     macropad_led_init();
+    macropad_led_start_loading();
 
     // init zigbee
     macropad_zb_init(NULL);
@@ -171,8 +172,9 @@ esp_err_t macropad_init() {
     macropad_zb_start();
 
     while (!macropad_zb_is_connected()) {
-        // macropad_led_blink();
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
+    macropad_led_stop_loading();
 
     macropad_zb_update_light_status(macropad_led_get_enabled());
     ESP_LOGI(TAG, "Zigbee connected!");

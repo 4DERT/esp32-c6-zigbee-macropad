@@ -54,8 +54,15 @@ void on_zbc_endpoint_attribute_set(const esp_zb_zcl_set_attr_value_message_t* me
         ESP_LOGI(TAG, "Light set to: %s", light_state ? "ON" : "OFF");
     }
 
-    else if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY) {
-        // macropad_led_blink();
+    else if (cluster == ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY && attribute == ESP_ZB_ZCL_ATTR_IDENTIFY_IDENTIFY_TIME_ID) {
+        uint16_t time = *(uint16_t*)message->attribute.data.value;
+        if (time > 0) {
+            macropad_led_start_loading();
+            ESP_LOGI(TAG, "Identify... (time=%u)", time);
+        } else {
+            macropad_led_stop_loading();
+            ESP_LOGI(TAG, "Identify stopped");
+        }
     }
 
     ESP_LOGI(TAG, "Attribute set: ep: %u, cl: %u", endpoint, cluster);

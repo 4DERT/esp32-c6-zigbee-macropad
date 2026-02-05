@@ -5,6 +5,7 @@
 
 #include "lsfx.h"
 #include "lsfx_fx_bicolor.h"
+#include "lsfx_fx_loading.h"
 #include "lsfx_fx_police.h"
 #include "lsfx_fx_rainbow.h"
 #include "lsfx_fx_static.h"
@@ -152,6 +153,18 @@ static uint8_t current_variant_index = 0; // Index for ..._variants
 static uint8_t current_brightness_index = BRIGHTNESS_LEVELS_NUM / 2 + 1;
 static bool is_enabled = false;
 
+// Special effect - loading - only when device is connecting to zigbee network
+static bool override_active = false;
+
+static const lsfx_fx_loading_params_t loading_params = {
+    .period_ms = 300,
+    .red = 0,
+    .green = 127,
+    .blue = 255,
+};
+
+// PRIVATE FUNCTIONS
+
 static inline void apply_current_fx(void) {
     const app_effect_t* effect = &app_effects[current_effect_index];
     const effect_variant_t* var = &effect->variants[current_variant_index];
@@ -199,21 +212,33 @@ void macropad_led_init() {
 
 void macropad_led_toggle_enabled() {
     is_enabled = !is_enabled;
+
+    if (override_active) {
+        return;
+    }
+
     lsfx_set_enabled(mlsfx, is_enabled);
     log_state("Toggle: ");
 }
 
 void macropad_led_set_enabled(bool state) {
     is_enabled = state;
+
+    if (override_active) {
+        return;
+    }
+
     lsfx_set_enabled(mlsfx, is_enabled);
     log_state("ENABLED: ");
 }
 
-inline bool macropad_led_get_enabled() {
-    return is_enabled;
-}
+inline bool macropad_led_get_enabled() { return is_enabled; }
 
 void macropad_led_cycle_effects() {
+    if (override_active) {
+        return;
+    }
+
     current_effect_index = (current_effect_index + 1) % NUM_EFFECTS;
     current_variant_index = 0;
 
@@ -222,6 +247,10 @@ void macropad_led_cycle_effects() {
 }
 
 void macropad_led_cycle_effect_variants() {
+    if (override_active) {
+        return;
+    }
+
     const uint8_t variants_num = app_effects[current_effect_index].num_variants;
     current_variant_index = (current_variant_index + 1) % variants_num;
 
@@ -230,7 +259,39 @@ void macropad_led_cycle_effect_variants() {
 }
 
 void macropad_led_cycle_brightness() {
+    if (override_active) {
+        return;
+    }
+
     current_brightness_index = (current_brightness_index + 1) % BRIGHTNESS_LEVELS_NUM;
     lsfx_set_brightness(mlsfx, brightness_levels[current_brightness_index]);
     log_state("CycleBrightness: ");
+}
+
+void macropad_led_start_loading() {
+    if (override_active) {
+        return;
+    }
+
+    override_active = true;
+
+    lsfx_set_enabled(mlsfx, true);
+    lsfx_set_brightness(mlsfx, brightness_levels[BRIGHTNESS_LEVELS_NUM - 1]);
+    lsfx_set_fx(mlsfx, &lsfx_fx_loading_t, &loading_params);
+
+    ESP_LOGI(TAG, "Loading effect started");
+}
+
+void macropad_led_stop_loading() {
+    if (!override_active) {
+        return;
+    }
+
+    override_active = false;
+
+    lsfx_set_brightness(mlsfx, brightness_levels[current_brightness_index]);
+    apply_current_fx();
+    lsfx_set_enabled(mlsfx, is_enabled);
+
+    ESP_LOGI(TAG, "Loading effect stopped, state restored");
 }

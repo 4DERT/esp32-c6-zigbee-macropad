@@ -44,3 +44,11 @@ void macropad_led_cycle_effect_variants() {
 void macropad_led_cycle_brightness() {
     ESP_LOGD(TAG, "CycleBrightness: No-op (single LED mode)");
 }
+
+void macropad_led_start_loading()(
+    ESP_LOGD(TAG, "Loading Start: No-op (single LED mode)");
+)
+
+void macropad_led_stop_loading(){
+    ESP_LOGD(TAG, "Loading Stop: No-op (single LED mode)");
+}
