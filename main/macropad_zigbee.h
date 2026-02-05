@@ -8,6 +8,7 @@
 
 void macropad_zb_init();
 void macropad_zb_start();
+void macropad_zb_factory_reset();
 bool macropad_zb_is_connected();
 void macropad_zb_send(uint8_t endpoint, esp_zb_zcl_on_off_cmd_id_t cmd_id);
 esp_err_t macropad_zb_create_endpoint(uint8_t endpoint);

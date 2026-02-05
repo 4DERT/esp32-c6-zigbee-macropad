@@ -28,6 +28,10 @@ static void handle_fn_layer(uint8_t id, key_evt_t evt, void* ctx) {
     if (evt == KEY_EVT_PRESS_DOWN || evt == KEY_EVT_PRESS_UP)
         ESP_LOGI(TAG, "fn+key %u: %s", id, evt_name(evt));
 
+    if(id == MACROPAD_KEY_FN_FACTORY_RESET && evt == KEY_EVT_LONG) {
+        macropad_zb_factory_reset();
+    }
+
     if (evt != KEY_EVT_PRESS_DOWN)
         return;
 
