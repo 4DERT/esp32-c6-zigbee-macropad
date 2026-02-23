@@ -1,0 +1,12 @@
+TODO
+- [x] ESP_RETURN_ON_ERROR(macropad_zb_create_light_endpoint(MACROPAD_KEY_COUNT+1), TAG, "Light endpoint failed"); - przenieść numer endpointu do KConfig!
+- [x] KOD w led na gpio jest dziwny - poprawić LOGI i te warunki z bool
+- [x] Opcję do resetu / odłączania od zigbee - factory resetu
+- [x] Fajna by była jakaś animacja przy dołączaniu i parowaniu do sieci
+- [x] Jakaś animacja przy identyfikacji
+- [ ] w pliku macropad_map.h są na sztywno wpisane numery klawiszy do FN
+- [ ] w README.md dopisać yamla w HA do obsługi klawiszy
+- [x] zmiana podsiwetlenia z klawiatury nie wysyła update do HA
+- [x] dodać STLe
+- [ ] dodać zdjęcia
+

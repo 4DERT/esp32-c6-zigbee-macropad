@@ -1,0 +1,240 @@
+description: ""
+mode: restart
+triggers:
+  - id: bt1-one
+    alias: Button 1 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 1
+      cluster_id: 6
+      command: toggle
+  - id: bt1-double
+    alias: Button 1 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 1
+      cluster_id: 6
+      command: "on"
+  - id: bt1-long
+    alias: Button 1 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 1
+      cluster_id: 6
+      command: "off"
+  - id: bt2-one
+    alias: Button 2 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 2
+      cluster_id: 6
+      command: toggle
+  - id: bt2-double
+    alias: Button 2 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 2
+      cluster_id: 6
+      command: "on"
+  - id: bt2-long
+    alias: Button 2 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 2
+      cluster_id: 6
+      command: "off"
+  - id: bt3-one
+    alias: Button 3 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 3
+      cluster_id: 6
+      command: toggle
+  - id: bt3-double
+    alias: Button 3 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 3
+      cluster_id: 6
+      command: "on"
+  - id: bt3-long
+    alias: Button 3 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 3
+      cluster_id: 6
+      command: "off"
+  - id: bt4-one
+    alias: Button 4 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 4
+      cluster_id: 6
+      command: toggle
+  - id: bt4-double
+    alias: Button 4 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 4
+      cluster_id: 6
+      command: "on"
+  - id: bt4-long
+    alias: Button 4 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 4
+      cluster_id: 6
+      command: "off"
+  - id: bt5-one
+    alias: Button 5 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 5
+      cluster_id: 6
+      command: toggle
+  - id: bt5-double
+    alias: Button 5 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 5
+      cluster_id: 6
+      command: "on"
+  - id: bt5-long
+    alias: Button 5 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 5
+      cluster_id: 6
+      command: "off"
+  - id: bt6-one
+    alias: Button 6 - one press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 6
+      cluster_id: 6
+      command: toggle
+  - id: bt6-double
+    alias: Button 6 - double press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 6
+      cluster_id: 6
+      command: "on"
+  - id: bt6-long
+    alias: Button 6 - long press
+    trigger: event
+    event_type: zha_event
+    event_data:
+      device_ieee: <YOURS IEEE>
+      endpoint_id: 6
+      cluster_id: 6
+      command: "off"
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: bt1-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt1-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt1-long
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt2-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt2-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt2-long
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt3-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt3-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt3-long
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt4-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt4-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt4-long
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt5-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt5-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt5-long
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt6-one
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt6-double
+        sequence: []
+      - conditions:
+          - condition: trigger
+            id: bt6-long
+        sequence: []
