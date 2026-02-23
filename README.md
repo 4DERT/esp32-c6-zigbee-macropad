@@ -5,10 +5,12 @@ A compact, 3D-printable 6-key mechanical macropad powered by the ESP32-C6. This 
 The custom 3D-printed enclosure features a dedicated mounting point specifically designed for the **DFRobot Beetle ESP32-C6** development board and supports standard mechanical keyboard switches (Cherry MX, Outemu, etc.).
 
 <p align="center">
-  <img src="images/Macropad_1.png" alt="Macropad Main View" width="800"/>
+  <img src="images/Macropad_1.jpg" alt="Macropad Main View" width="800"/>
 </p>
 
-<img src="images/macropad_demo.gif" width="50%" height="50%"/>
+<p align="center">
+  <img src="images/macropad_demo.gif" width="50%" height="50%"/>
+</p>
 
 ## Features
 
@@ -26,12 +28,12 @@ The custom 3D-printed enclosure features a dedicated mounting point specifically
 <p align="center">
   <table>
     <tr>
-      <td><img src="images/Macropad_2.png" alt="Macropad View 2" width="400"/></td>
-      <td><img src="images/Macropad_3.png" alt="Macropad View 3" width="400"/></td>
+      <td><img src="images/Macropad_2.jpg" alt="Macropad View 2" width="400"/></td>
+      <td><img src="images/Macropad_3.jpg" alt="Macropad View 3" width="400"/></td>
     </tr>
     <tr>
-      <td><img src="images/Macropad_5.png" alt="Macropad View 5" width="400"/></td>
-      <td><img src="images/Macropad_6.png" alt="Macropad View 6" width="400"/></td>
+      <td><img src="images/Macropad_5.jpg" alt="Macropad View 5" width="400"/></td>
+      <td><img src="images/Macropad_6.jpg" alt="Macropad View 6" width="400"/></td>
     </tr>
   </table>
 </p>
@@ -68,7 +70,7 @@ The `STL` folder contains all the core enclosure files (`Base`, `Plate`, etc.).
 | **4** | `GPIO 19` |
 | **5** | `GPIO 6` |
 
-<img src="images/Macropad_8.png" alt="Wiring Diagram" width="600"/>
+<img src="images/Macropad_8.jpg" alt="Wiring Diagram" width="600"/>
 
 **RGB Strip (WS2812):** 
 * Connect the data line to **GPIO 17**.
@@ -79,7 +81,7 @@ The `STL` folder contains all the core enclosure files (`Base`, `Plate`, etc.).
 
 Once wired, carefully tuck the wiring and components into the enclosure and screw everything together.
 
-<img src="images/Macropad_7.png" alt="Internal Assembly" width="600"/>
+<img src="images/Macropad_7.jpg" alt="Internal Assembly" width="600"/>
 
 ## Building & Flashing
 
@@ -102,6 +104,8 @@ If you don't want to set up a development environment, you can flash the pre-com
     ```bash
     idf.py menuconfig
     ```
+
+<img src="images/menuconfig.png" alt="ESP-IDF Menuconfig Interface" width="600"/>
 
 4. Set the target to ESP32-C6:
     ```bash
@@ -132,6 +136,8 @@ Every Zigbee device has a unique MAC address. To make the automation work, you n
 * Open **Zigbee Home Automation** integration.
 * Find and select your Macropad from the device list.
 * Under the **Device info** panel copy the `IEEE` address (it will look something like `7c:2c:67:ff:fe:51:a0:00`).
+
+<img src="images/home_assistant.png" alt="Home Assistant Device Info" width="600"/>
 
 **2. Import the Automation:**
 * Open the [`ha_automation_template.yaml`](ha_automation_template.yaml) file located in this repository and copy its contents.
